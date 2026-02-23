@@ -1,5 +1,8 @@
-package com.dekk.card.domain;
+package com.dekk.card.domain.model;
 
+import com.dekk.card.application.command.ProductImageCreateCommand;
+import com.dekk.card.domain.exception.CardBusinessException;
+import com.dekk.card.domain.exception.CardErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,14 +29,36 @@ public class ProductImage {
     private Product product;
 
     @Column(name = "origin_url", nullable = false)
-    @Comment("원본 이미지 경로")
     private String originUrl;
 
     @Column(name = "image_url")
-    @Comment("이미지 경로")
     private String imageUrl;
 
     @Column(name = "is_uploaded", nullable = false)
-    @Comment("이미지 업로드 완료 여부")
     private Boolean isUploaded;
+
+    private ProductImage(
+            String originUrl,
+            String imageUrl,
+            Boolean isUploaded
+    ) {
+        this.originUrl = originUrl;
+        this.imageUrl = imageUrl;
+        this.isUploaded = isUploaded;
+    }
+
+    protected static ProductImage create(ProductImageCreateCommand command) {
+        if (command.originUrl() == null) {
+            throw new CardBusinessException(CardErrorCode.PRODUCT_ORIGIN_URL_IS_REQUIRED_TO_CREATE);
+        }
+        return new ProductImage(
+                command.originUrl(),
+                command.imageUrl(),
+                command.isUploaded()
+        );
+    }
+
+    protected void setProduct(Product product) {
+        this.product = product;
+    }
 }

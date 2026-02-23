@@ -1,0 +1,101 @@
+package com.dekk.card.domain.model;
+
+import com.dekk.card.application.command.ProductCreateCommand;
+import com.dekk.card.domain.exception.CardBusinessException;
+import com.dekk.card.domain.exception.CardErrorCode;
+import com.dekk.card.domain.model.enums.ProductGender;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@Table(name = "products")
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "card_id")
+    private Card card;
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private ProductImage productImage;
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private ProductRawData productRawData;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column
+    private Integer price;
+
+    @Column(name = "external_product_id", nullable = false)
+    private String externalProductId;
+
+    private String option;
+
+    @Column(name = "is_similar", nullable = false)
+    private Boolean isSimilar;
+
+    @Column(name = "product_url")
+    private String productUrl;
+
+    @Enumerated(EnumType.STRING)
+    private ProductGender gender;
+
+    private Product(
+            ProductImage productImage,
+            ProductRawData productRawData,
+            String name,
+            Integer price,
+            String externalProductId,
+            String option,
+            Boolean isSimilar,
+            String productUrl
+    ) {
+        this.productImage = productImage;
+        this.productRawData = productRawData;
+        this.name = name;
+        this.price = price;
+        this.externalProductId = externalProductId;
+        this.option = option;
+        this.isSimilar = isSimilar;
+        this.productUrl = productUrl;
+    }
+
+    public static Product create(ProductCreateCommand command) {
+        ProductImage productImage = ProductImage.create(command.productImage());
+        ProductRawData productRawData = ProductRawData.create(command.productRawData());
+
+        if (command.name() == null) {
+            throw new CardBusinessException(CardErrorCode.PRODUCT_NAME_IS_REQUIRED_TO_CREATE);
+        }
+
+        if (command.externalProductId() == null) {
+            throw new CardBusinessException(CardErrorCode.PRODUCT_EXTERNAL_ID_IS_REQUIRED_TO_CREATE);
+        }
+
+        Product product = new Product(
+                productImage,
+                productRawData,
+                command.name(),
+                command.price(),
+                command.externalProductId(),
+                command.option(),
+                command.isSimilar(),
+                command.productUrl()
+        );
+
+        productImage.setProduct(product);
+        productRawData.setProduct(product);
+        return product;
+    }
+
+    protected void setCard(Card card) {
+        this.card = card;
+    }
+
+}
