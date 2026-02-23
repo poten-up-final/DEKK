@@ -10,6 +10,8 @@ public enum CardErrorCode implements ErrorCode {
     PRODUCT_EXTERNAL_ID_IS_REQUIRED_TO_CREATE(HttpStatus.BAD_REQUEST, "EC004", "상품 고유 id는 필수값입니다"),
     CARD_RAW_DATA_IS_REQUIRED_TO_CREATE(HttpStatus.BAD_REQUEST, "EC005", "카드 원본 데이터는 필수 값입니다"),
     CARD_ORIGIN_URL_IS_REQUIRED_TO_CREATE(HttpStatus.BAD_REQUEST, "EC006", "카드 원본 이미지 경로는 필수 값입니다"),
+    CARD_ORIGIN_ID_IS_REQUIRED_TO_CREATE(HttpStatus.BAD_REQUEST, "EC007", "카드 고유 id는 필수 값입니다"),
+    CARD_PLATFORM_IS_REQUIRED_TO_CREATE(HttpStatus.BAD_REQUEST, "EC008", "카드 플랫폼은 필수 값입니다"),
     ;
 
     private final HttpStatus httpStatus;

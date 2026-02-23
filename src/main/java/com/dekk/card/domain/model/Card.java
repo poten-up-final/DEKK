@@ -1,6 +1,8 @@
 package com.dekk.card.domain.model;
 
 import com.dekk.card.application.command.CardCreateCommand;
+import com.dekk.card.domain.exception.CardBusinessException;
+import com.dekk.card.domain.exception.CardErrorCode;
 import com.dekk.card.domain.model.enums.Platform;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -54,6 +56,7 @@ public class Card {
     private Boolean isActive;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Platform platform;
 
     private Integer height;
@@ -70,7 +73,6 @@ public class Card {
             Platform platform,
             Integer height,
             Integer weight
-
     ) {
         this.cardImage = cardImage;
         this.cardRawData = cardRawData;
@@ -84,6 +86,10 @@ public class Card {
     }
 
     public static Card create(CardCreateCommand command) {
+        if (command.originId() == null) {
+            throw new CardBusinessException(CardErrorCode.CARD_ORIGIN_ID_IS_REQUIRED_TO_CREATE);
+        }
+
         CardImage cardImage = CardImage.create(command.cardImage());
         CardRawData cardRawData = CardRawData.create(command.cardRawData());
         Card card = new Card(
@@ -92,7 +98,7 @@ public class Card {
                 command.productCreateCommands().stream().map(Product::create).toList(),
                 command.tagIds(),
                 command.originId(),
-                command.isActive(),
+                true,
                 command.platform(),
                 command.height(),
                 command.weight()
