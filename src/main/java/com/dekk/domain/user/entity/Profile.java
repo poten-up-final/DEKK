@@ -1,6 +1,8 @@
 package com.dekk.domain.user.entity;
 
 
+import com.dekk.common.error.BusinessException;
+import com.dekk.common.error.UserErrorCode;
 import com.dekk.domain.user.model.Gender;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -33,6 +35,7 @@ public class Profile {
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private Profile(User user, Double height, Double weight, String nickname, Gender gender) {
+        validateNickname(nickname);
         this.user = user;
         this.height = height;
         this.weight = weight;
@@ -46,6 +49,7 @@ public class Profile {
 
     public void update(String nickname, Double height, Double weight, Gender gender) {
         if (nickname != null && !nickname.isBlank()) {
+            validateNickname(nickname);
             this.nickname = nickname;
         }
         if (height != null) {
@@ -56,6 +60,11 @@ public class Profile {
         }
         if (gender != null) {
             this.gender = gender;
+        }
+    }
+    private void validateNickname(String nickname) {
+        if (nickname == null || nickname.isBlank() || nickname.length() > 20) {
+            throw new BusinessException(UserErrorCode.INVALID_NICKNAME);
         }
     }
 }
