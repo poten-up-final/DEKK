@@ -1,0 +1,49 @@
+package com.dekk.security.oauth2.dto;
+
+import com.dekk.security.oauth2.exception.AuthErrorCode;
+import com.dekk.user.domain.model.enums.Provider;
+import com.dekk.security.oauth2.exception.CustomOAuth2Exception;
+
+import java.util.Map;
+
+public class GoogleOAuth2UserInfo implements  OAuth2UserInfo {
+
+    private final Map<String,Object> attributes;
+
+    public GoogleOAuth2UserInfo(Map<String, Object> attributes) {
+        if(attributes ==null || attributes.isEmpty()){
+            throw new CustomOAuth2Exception(AuthErrorCode.MISSING_USER_INFO);
+        }
+
+        if(attributes.get("sub") == null || attributes.get("email") == null){
+            throw new CustomOAuth2Exception(AuthErrorCode.MISSING_USER_INFO);
+        }
+
+        this.attributes = attributes;
+    }
+
+    @Override
+    public Provider getProvider() {
+        return Provider.GOOGLE;
+    }
+
+    @Override
+    public String getProviderId() {
+        return (String) attributes.get("sub");
+    }
+
+    @Override
+    public String getEmail() {
+        return (String) attributes.get("email");
+    }
+
+    @Override
+    public String getName() {
+        return (String) attributes.get("name");
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+}
