@@ -39,7 +39,7 @@ public class Card {
     private CardRawData cardRawData;
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products = new ArrayList<>();
+    private List<CardProduct> cardProducts = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(
@@ -66,7 +66,6 @@ public class Card {
     private Card(
             CardImage cardImage,
             CardRawData cardRawData,
-            List<Product> products,
             List<Long> tagIds,
             String originId,
             Boolean isActive,
@@ -76,7 +75,6 @@ public class Card {
     ) {
         this.cardImage = cardImage;
         this.cardRawData = cardRawData;
-        this.products = products;
         this.tagIds = tagIds;
         this.originId = originId;
         this.isActive = isActive;
@@ -95,7 +93,6 @@ public class Card {
         Card card = new Card(
                 cardImage,
                 cardRawData,
-                command.productCreateCommands().stream().map(Product::create).toList(),
                 command.tagIds(),
                 command.originId(),
                 true,
@@ -106,7 +103,10 @@ public class Card {
 
         cardImage.setCard(card);
         cardRawData.setCard(card);
-        card.products.forEach(product -> product.setCard(card));
+        command.productCreateCommands().stream()
+                .map(Product::create)
+                .map(product -> CardProduct.create(card, product))
+                .forEach(card.cardProducts::add);
         return card;
     }
 }

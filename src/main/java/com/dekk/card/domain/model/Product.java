@@ -16,10 +16,6 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "card_id")
-    private Card card;
-
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private ProductImage productImage;
 
@@ -92,9 +88,4 @@ public class Product {
         productRawData.setProduct(product);
         return product;
     }
-
-    protected void setCard(Card card) {
-        this.card = card;
-    }
-
 }
