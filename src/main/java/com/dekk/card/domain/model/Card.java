@@ -38,13 +38,8 @@ public class Card {
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CardProduct> cardProducts = new ArrayList<>();
 
-    @ElementCollection
-    @CollectionTable(
-        name = "card_tags",
-        joinColumns = @JoinColumn(name = "card_id")
-    )
-    @Column(name = "tag_id")
-    private List<Long> tagIds = new ArrayList<>();
+    @Column(name = "tags")
+    private String tags;
 
     @Column(name = "origin_id", nullable = false, updatable = false)
     private String originId;
@@ -62,7 +57,7 @@ public class Card {
 
     private Card(
             CardImage cardImage,
-            List<Long> tagIds,
+            String tags,
             String originId,
             Boolean isActive,
             Platform platform,
@@ -70,7 +65,7 @@ public class Card {
             Double weight
     ) {
         this.cardImage = cardImage;
-        this.tagIds = tagIds;
+        this.tags = tags;
         this.originId = originId;
         this.isActive = isActive;
         this.platform = platform;
@@ -87,7 +82,7 @@ public class Card {
 
         Card card = new Card(
                 cardImage,
-                command.tagIds(),
+                command.tags(),
                 command.originId(),
                 true,
                 command.platform(),

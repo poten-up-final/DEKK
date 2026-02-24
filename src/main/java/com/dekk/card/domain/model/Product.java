@@ -30,7 +30,7 @@ public class Product {
     private String option;
 
     @Column(name = "is_similar", nullable = false)
-    private Boolean isSimilar;
+    private boolean isSimilar;
 
     @Column(name = "product_url")
     private String productUrl;

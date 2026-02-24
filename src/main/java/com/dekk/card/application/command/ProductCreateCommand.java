@@ -8,7 +8,7 @@ public record ProductCreateCommand(
     Integer price,
     String originId,
     String option,
-    Boolean isSimilar,
+    boolean isSimilar,
     String productUrl,
     ProductGender gender
 ) {
