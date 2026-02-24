@@ -35,9 +35,6 @@ public class Card {
     @OneToOne(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private CardImage cardImage;
 
-    @OneToOne(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private CardRawData cardRawData;
-
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CardProduct> cardProducts = new ArrayList<>();
 
@@ -65,7 +62,6 @@ public class Card {
 
     private Card(
             CardImage cardImage,
-            CardRawData cardRawData,
             List<Long> tagIds,
             String originId,
             Boolean isActive,
@@ -74,7 +70,6 @@ public class Card {
             Integer weight
     ) {
         this.cardImage = cardImage;
-        this.cardRawData = cardRawData;
         this.tagIds = tagIds;
         this.originId = originId;
         this.isActive = isActive;
@@ -89,10 +84,9 @@ public class Card {
         }
 
         CardImage cardImage = CardImage.create(command.cardImage());
-        CardRawData cardRawData = CardRawData.create(command.cardRawData());
+
         Card card = new Card(
                 cardImage,
-                cardRawData,
                 command.tagIds(),
                 command.originId(),
                 true,
@@ -102,7 +96,6 @@ public class Card {
         );
 
         cardImage.setCard(card);
-        cardRawData.setCard(card);
         command.productCreateCommands().stream()
                 .map(Product::create)
                 .map(product -> CardProduct.create(card, product))

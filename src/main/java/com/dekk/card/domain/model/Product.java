@@ -19,9 +19,6 @@ public class Product {
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private ProductImage productImage;
 
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private ProductRawData productRawData;
-
     @Column(nullable = false)
     private String name;
 
@@ -43,7 +40,6 @@ public class Product {
 
     private Product(
             ProductImage productImage,
-            ProductRawData productRawData,
             String name,
             Integer price,
             String originId,
@@ -52,7 +48,6 @@ public class Product {
             String productUrl
     ) {
         this.productImage = productImage;
-        this.productRawData = productRawData;
         this.name = name;
         this.price = price;
         this.originId = originId;
@@ -63,7 +58,6 @@ public class Product {
 
     public static Product create(ProductCreateCommand command) {
         ProductImage productImage = ProductImage.create(command.productImage());
-        ProductRawData productRawData = ProductRawData.create(command.productRawData());
 
         if (command.name() == null) {
             throw new CardBusinessException(CardErrorCode.PRODUCT_NAME_IS_REQUIRED_TO_CREATE);
@@ -75,7 +69,6 @@ public class Product {
 
         Product product = new Product(
                 productImage,
-                productRawData,
                 command.name(),
                 command.price(),
                 command.originId(),
@@ -85,7 +78,6 @@ public class Product {
         );
 
         productImage.setProduct(product);
-        productRawData.setProduct(product);
         return product;
     }
 }

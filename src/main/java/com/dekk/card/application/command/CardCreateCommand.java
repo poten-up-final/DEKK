@@ -6,7 +6,6 @@ import java.util.List;
 
 public record CardCreateCommand(
     CardImageCreateCommand cardImage,
-    CardRawDataCommand cardRawData,
     List<ProductCreateCommand> productCreateCommands,
     List<Long> tagIds,
     String originId,

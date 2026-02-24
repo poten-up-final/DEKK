@@ -4,7 +4,6 @@ import com.dekk.card.domain.model.enums.ProductGender;
 
 public record ProductCreateCommand(
     ProductImageCreateCommand productImage,
-    ProductRawDataCommand productRawData,
     String name,
     Integer price,
     String originId,
