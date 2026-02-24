@@ -35,12 +35,12 @@ public class ProductImage {
     private String imageUrl;
 
     @Column(name = "is_uploaded", nullable = false)
-    private Boolean isUploaded;
+    private boolean isUploaded;
 
     private ProductImage(
             String originUrl,
             String imageUrl,
-            Boolean isUploaded
+            boolean isUploaded
     ) {
         this.originUrl = originUrl;
         this.imageUrl = imageUrl;
