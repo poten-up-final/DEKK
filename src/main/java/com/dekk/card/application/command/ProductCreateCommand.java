@@ -7,7 +7,7 @@ public record ProductCreateCommand(
     ProductRawDataCommand productRawData,
     String name,
     Integer price,
-    String externalProductId,
+    String originId,
     String option,
     Boolean isSimilar,
     String productUrl,

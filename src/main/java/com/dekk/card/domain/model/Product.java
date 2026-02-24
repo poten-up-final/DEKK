@@ -29,11 +29,10 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column
     private Integer price;
 
-    @Column(name = "external_product_id", nullable = false)
-    private String externalProductId;
+    @Column(name = "origin_id", nullable = false)
+    private String originId;
 
     private String option;
 
@@ -51,7 +50,7 @@ public class Product {
             ProductRawData productRawData,
             String name,
             Integer price,
-            String externalProductId,
+            String originId,
             String option,
             Boolean isSimilar,
             String productUrl
@@ -60,7 +59,7 @@ public class Product {
         this.productRawData = productRawData;
         this.name = name;
         this.price = price;
-        this.externalProductId = externalProductId;
+        this.originId = originId;
         this.option = option;
         this.isSimilar = isSimilar;
         this.productUrl = productUrl;
@@ -74,7 +73,7 @@ public class Product {
             throw new CardBusinessException(CardErrorCode.PRODUCT_NAME_IS_REQUIRED_TO_CREATE);
         }
 
-        if (command.externalProductId() == null) {
+        if (command.originId() == null) {
             throw new CardBusinessException(CardErrorCode.PRODUCT_EXTERNAL_ID_IS_REQUIRED_TO_CREATE);
         }
 
@@ -83,7 +82,7 @@ public class Product {
                 productRawData,
                 command.name(),
                 command.price(),
-                command.externalProductId(),
+                command.originId(),
                 command.option(),
                 command.isSimilar(),
                 command.productUrl()
