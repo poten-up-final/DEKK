@@ -1,10 +1,8 @@
-package com.dekk.common.error;
+package com.dekk.user.domain.exception;
 
-
-import lombok.RequiredArgsConstructor;
+import com.dekk.common.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-@RequiredArgsConstructor
 public enum UserErrorCode implements ErrorCode {
 
     // 400 BAD_REQUEST
@@ -21,6 +19,12 @@ public enum UserErrorCode implements ErrorCode {
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;
+
+    UserErrorCode(HttpStatus httpStatus, String code, String message) {
+        this.httpStatus = httpStatus;
+        this.code = code;
+        this.message = message;
+    }
 
     @Override
     public HttpStatus status() {

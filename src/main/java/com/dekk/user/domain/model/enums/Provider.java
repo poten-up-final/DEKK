@@ -1,4 +1,4 @@
-package com.dekk.domain.user.model;
+package com.dekk.user.domain.model.enums;
 
 public enum Provider {
     GOOGLE,
