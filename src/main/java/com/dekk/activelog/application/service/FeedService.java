@@ -24,7 +24,7 @@ public class FeedService {
 
         // TODO: 효진님의 CardQueryService.getUnseenCardsByUserId() 구현이 완료/머지되면 아래 로직 주석 해제 예정! (by SungRyulCho)
         /*
-        List&lt;Card&gt; unseenCards = cardQueryService.getUnseenCardsByUserId(userId, pageRequest);
+        List<Card> unseenCards = cardQueryService.getUnseenCardsByUserId(userId, pageRequest);
 
         return unseenCards.stream()
                 .map(card -> {
