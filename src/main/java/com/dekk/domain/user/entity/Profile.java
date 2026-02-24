@@ -9,11 +9,16 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.regex.Pattern;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "profiles")
 public class Profile {
+
+    // 💡 1. 닉네임 정규표현식 (한글, 영문, 숫자, 언더바(_) 허용)
+    private static final Pattern NICKNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9가-힣_]+$");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +34,7 @@ public class Profile {
     @Column(nullable = false)
     private Double weight;
 
-    @Column(nullable = false, length = 20, unique = true)
+    @Column(nullable = false, length = 10, unique = true)
     private String nickname;
 
     @Enumerated(EnumType.STRING)
@@ -63,7 +68,11 @@ public class Profile {
         }
     }
     private void validateNickname(String nickname) {
-        if (nickname == null || nickname.isBlank() || nickname.length() > 20) {
+        if (nickname == null || nickname.isBlank() || nickname.length() > 10) {
+            throw new BusinessException(UserErrorCode.INVALID_NICKNAME);
+        }
+
+        if(!NICKNAME_PATTERN.matcher(nickname).matches()) {
             throw new BusinessException(UserErrorCode.INVALID_NICKNAME);
         }
     }
