@@ -55,9 +55,7 @@ public class User extends BaseTimeEntity {
     }
 
     public void completeOnboarding(String nickname, Double height, Double weight, Gender gender) {
-        if (this.status != UserStatus.PENDING) {
-            throw new IllegalStateException("이미 온보딩이 완료된 사용자입니다.");
-        }
+        validatePendingStatus();
         this.gender = gender;
         this.status = UserStatus.ACTIVE;
         this.profile = Profile.create(this, height, weight, nickname);
@@ -67,11 +65,19 @@ public class User extends BaseTimeEntity {
         if(this.profile != null) {
             this.profile.update(nickname, height, weight);
         }
-        this.gender = gender;
+        if(gender != null) {
+            this.gender = gender;
+        }
     }
 
     public void deleteUser() {
         this.status = UserStatus.DELETED;
         this.markAsDeleted();
+    }
+
+    private void validatePendingStatus() {
+        if (this.status != UserStatus.PENDING) {
+            throw new IllegalStateException("이미 온보딩이 완료된 사용자입니다.");
+        }
     }
 }

@@ -41,8 +41,14 @@ public class Profile {
     }
 
     public void update(String nickname, Double height, Double weight) {
-        this.nickname = nickname;
-        this.height = height;
-        this.weight = weight;
+            if (nickname != null && !nickname.isBlank()) {
+                this.nickname = nickname;
+            }
+            if (height != null) {
+                this.height = height;
+            }
+            if (weight != null) {
+                this.weight = weight;
+        }
     }
 }
