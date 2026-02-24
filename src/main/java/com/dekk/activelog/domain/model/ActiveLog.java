@@ -7,8 +7,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -26,7 +27,8 @@ import org.hibernate.annotations.SQLRestriction;
     }
 )
 @SQLDelete(sql = "UPDATE active_logs SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
-@SQLRestriction("deleted_at IS NULL")
+@FilterDef(name = "deletedFilter", defaultCondition = "deleted_at IS NULL")
+@Filter(name = "deletedFilter")
 public class ActiveLog extends BaseTimeEntity {
 
     @Id
