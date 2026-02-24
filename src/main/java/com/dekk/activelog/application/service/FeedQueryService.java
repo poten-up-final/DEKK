@@ -1,9 +1,7 @@
 package com.dekk.activelog.application.service;
 
-import com.dekk.activelog.presentation.response.UnseenCardResponse;
+import com.dekk.activelog.application.dto.result.UnseenCardResult;
 // import com.dekk.card.application.service.CardQueryService;
-// import com.dekk.card.domain.model.Card;
-// import com.dekk.card.domain.model.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -15,17 +13,16 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class FeedService {
+public class FeedQueryService {
 
     // private final CardQueryService cardQueryService;
 
-    public List<UnseenCardResponse> getUnseenCards(Long userId, int size) {
+    public List<UnseenCardResult> getUnseenCards(Long userId, int size) {
         PageRequest pageRequest = PageRequest.of(0, size);
 
         // TODO: 효진님의 CardQueryService.getUnseenCardsByUserId() 구현이 완료/머지되면 아래 로직 주석 해제 예정! (by SungRyulCho)
         /*
         List<Card> unseenCards = cardQueryService.getUnseenCardsByUserId(userId, pageRequest);
-
         return unseenCards.stream()
                 .map(card -> {
                     String productName = "";
@@ -35,8 +32,7 @@ public class FeedService {
                         productName = mainProduct.getName();
                         price = mainProduct.getPrice();
                     }
-
-                    return UnseenCardResponse.from(
+                    return UnseenCardResult.of(
                             card.getId(),
                             card.getCardImage().getImageUrl(),
                             card.getPlatform().getDescription(),

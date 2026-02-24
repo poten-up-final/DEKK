@@ -1,6 +1,7 @@
 package com.dekk.activelog.presentation.controller;
 
-import com.dekk.activelog.application.service.FeedService;
+import com.dekk.activelog.application.dto.result.UnseenCardResult;
+import com.dekk.activelog.application.service.FeedQueryService;
 import com.dekk.activelog.presentation.response.UnseenCardResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -20,17 +21,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FeedController implements FeedApi {
 
-    private final FeedService feedService;
+    private final FeedQueryService feedQueryService;
 
     @Override
     @GetMapping("/unseen")
     public ResponseEntity<List<UnseenCardResponse>> getUnseenCards(
         @RequestParam Long userId,
+        @RequestParam(defaultValue = "10") @Min(1) @Max(30) int size
+    ) {
+        List<UnseenCardResult> results = feedQueryService.getUnseenCards(userId, size);
 
-        @RequestParam(defaultValue = "10")
-            @Min(1) @Max(30) int size
-        ) {
-        List<UnseenCardResponse> responses = feedService.getUnseenCards(userId, size);
+        List<UnseenCardResponse> responses = results.stream()
+            .map(result -> UnseenCardResponse.from(
+                result.cardId(),
+                result.imageUrl(),
+                result.brandName(),
+                result.productName(),
+                result.price()
+            ))
+            .toList();
+
         return ResponseEntity.ok(responses);
     }
 }
