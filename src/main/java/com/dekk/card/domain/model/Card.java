@@ -51,9 +51,9 @@ public class Card {
     @Column(nullable = false)
     private Platform platform;
 
-    private Integer height;
+    private Double height;
 
-    private Integer weight;
+    private Double weight;
 
     private Card(
             CardImage cardImage,
@@ -61,8 +61,8 @@ public class Card {
             String originId,
             Boolean isActive,
             Platform platform,
-            Integer height,
-            Integer weight
+            Double height,
+            Double weight
     ) {
         this.cardImage = cardImage;
         this.tags = tags;
