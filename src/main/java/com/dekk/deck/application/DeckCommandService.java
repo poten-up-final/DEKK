@@ -1,4 +1,4 @@
-package com.dekk.deck.applicaition;
+package com.dekk.deck.application;
 
 import com.dekk.deck.domain.model.Deck;
 import com.dekk.deck.domain.repository.DeckRepository;
