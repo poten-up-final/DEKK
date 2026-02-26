@@ -5,9 +5,7 @@ import com.dekk.card.domain.exception.CardBusinessException;
 import com.dekk.card.domain.exception.CardErrorCode;
 import com.dekk.card.domain.model.enums.Platform;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,7 +13,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -51,9 +48,9 @@ public class Card {
     @Column(nullable = false)
     private Platform platform;
 
-    private Double height;
+    private Integer height;
 
-    private Double weight;
+    private Integer weight;
 
     private Card(
             CardImage cardImage,
@@ -61,8 +58,8 @@ public class Card {
             String originId,
             Boolean isActive,
             Platform platform,
-            Double height,
-            Double weight
+            Integer height,
+            Integer weight
     ) {
         this.cardImage = cardImage;
         this.tags = tags;
