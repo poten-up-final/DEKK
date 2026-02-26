@@ -18,7 +18,7 @@ public class ActiveLogCommandService {
     @Transactional
     public void saveSwipeAction(SwipeCommand command) {
         if (activeLogRepository.existsByUserIdAndCardId(command.userId(), command.cardId())) {
-            throw new ActiveLogBusinessException(ActiveLogErrorCode.ALREADY_SWIPED);
+            return;
         }
 
         ActiveLog activeLog = ActiveLog.create(command.userId(), command.cardId(), command.swipeType());

@@ -16,7 +16,6 @@ public interface ActiveLogApi {
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SAL20001)"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터 또는 SwipeType 오류 (EAL40001)"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "이미 평가된 카드에 대한 중복 요청 (EAL40901)")
     })
 
     ApiResponse<Void> swipeCard(
