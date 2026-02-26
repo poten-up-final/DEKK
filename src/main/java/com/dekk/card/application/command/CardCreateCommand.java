@@ -11,7 +11,7 @@ public record CardCreateCommand(
     String originId,
     boolean isActive,
     Platform platform,
-    Double height,
-    Double weight
+    Integer height,
+    Integer weight
 ) {
 }
