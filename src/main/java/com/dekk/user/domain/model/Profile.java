@@ -40,10 +40,10 @@ public class Profile {
     private User user;
 
     @Column(nullable = false)
-    private double height;
+    private int height;
 
     @Column(nullable = false)
-    private double weight;
+    private int weight;
 
     @Column(nullable = false, length = 10, unique = true)
     private String nickname;
@@ -51,7 +51,7 @@ public class Profile {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    private Profile(User user, Double height, Double weight, String nickname, Gender gender) {
+    private Profile(User user, int height, int weight, String nickname, Gender gender) {
         validateNickname(nickname);
         this.user = user;
         this.height = height;
@@ -61,6 +61,10 @@ public class Profile {
     }
 
     public static Profile create(User user, UserOnboardingCommand command) {
+        if (command.height() == null || command.weight() == null) {
+            throw new UserBusinessException(UserErrorCode.INVALID_PROFILE_INFO);
+        }
+
         return new Profile(user, command.height(), command.weight(), command.nickname(), command.gender());
     }
 
