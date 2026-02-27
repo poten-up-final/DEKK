@@ -1,7 +1,8 @@
-package com.dekk.activelog.infrastructure.repository;
+package com.dekk.activelog.infrastructure;
 
 import com.dekk.activelog.domain.model.ActiveLog;
 import com.dekk.activelog.domain.repository.ActiveLogRepository;
+import com.dekk.activelog.infrastructure.jpa.ActiveLogJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;

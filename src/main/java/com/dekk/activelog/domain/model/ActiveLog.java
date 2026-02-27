@@ -3,12 +3,24 @@ package com.dekk.activelog.domain.model;
 import com.dekk.activelog.domain.exception.ActiveLogBusinessException;
 import com.dekk.activelog.domain.exception.ActiveLogErrorCode;
 import com.dekk.common.entity.BaseTimeEntity;
+<<<<<<< DK-11
 import jakarta.persistence.*;
+=======
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+>>>>>>> develop
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.SQLDelete;
 
 @Entity
@@ -27,7 +39,6 @@ import org.hibernate.annotations.SQLDelete;
     }
 )
 @SQLDelete(sql = "UPDATE active_logs SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
-@FilterDef(name = "deletedFilter", defaultCondition = "deleted_at IS NULL")
 @Filter(name = "deletedFilter")
 public class ActiveLog extends BaseTimeEntity {
 
