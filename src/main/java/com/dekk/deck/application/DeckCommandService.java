@@ -7,18 +7,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class DeckCommandService {
 
     private final DeckRepository deckRepository;
 
-    @Transactional
     public void createDefaultDeck(Long userId) {
         if (deckRepository.findByUserIdAndIsDefaultTrue(userId).isPresent()) {
             return;
         }
 
-        Deck defaultDeck = Deck.create(userId, "나의 기본 보관함", true);
+        Deck defaultDeck = Deck.createDefault(userId);
         deckRepository.save(defaultDeck);
     }
 }

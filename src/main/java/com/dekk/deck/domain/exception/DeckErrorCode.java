@@ -1,8 +1,10 @@
 package com.dekk.deck.domain.exception;
 
 import com.dekk.common.error.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+@RequiredArgsConstructor
 public enum DeckErrorCode implements ErrorCode {
     USER_ID_IS_REQUIRED_TO_CREATE(HttpStatus.BAD_REQUEST, "ED40001", "유저 ID는 필수값입니다"),
     DECK_NAME_IS_REQUIRED_TO_CREATE(HttpStatus.BAD_REQUEST, "ED40002", "보관함 이름은 필수값입니다"),
@@ -14,12 +16,6 @@ public enum DeckErrorCode implements ErrorCode {
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;
-
-    DeckErrorCode(HttpStatus httpStatus, String code, String message) {
-        this.httpStatus = httpStatus;
-        this.code = code;
-        this.message = message;
-    }
 
     @Override public HttpStatus status() { return httpStatus; }
     @Override public String code() { return code; }
