@@ -205,11 +205,7 @@ public class MusinsaCrawlDataParser implements CrawlDataParser {
         }
 
         String value = genderNode.asText().toUpperCase();
-        return switch (value) {
-            case "WOMEN", "FEMALE", "여성" -> ProductGender.WOMEN;
-            case "MEN", "MALE", "남성" -> ProductGender.MEN;
-            default -> ProductGender.UNDEFINED;
-        };
+        return ProductGender.musinsaParse(value);
     }
 
     private Integer parseNullableInt(JsonNode node) {
