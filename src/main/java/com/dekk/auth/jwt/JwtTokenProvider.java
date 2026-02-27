@@ -1,10 +1,8 @@
 package com.dekk.auth.jwt;
 
-import com.dekk.auth.jwt.exception.JwtBusinessException;
-import com.dekk.auth.jwt.exception.JwtErrorCode;
+import com.dekk.auth.domain.exception.AuthBusinessException;
+import com.dekk.auth.domain.exception.AuthErrorCode;
 import com.dekk.security.oauth2.CustomUserDetails;
-import com.dekk.user.domain.model.User;
-import com.dekk.user.domain.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -35,19 +33,16 @@ public class JwtTokenProvider {
     private final Key key;
     private final long accessTokenValidityTime;
     private final long refreshTokenValidityTime;
-    private final UserRepository userRepository;
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token-validity-in-seconds}") long accessTokenValidityInSeconds,
-            @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds,
-            UserRepository userRepository) {
+            @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds) {
 
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidityTime = accessTokenValidityInSeconds * 1000;
         this.refreshTokenValidityTime = refreshTokenValidityInSeconds * 1000;
-        this.userRepository = userRepository;
     }
 
     public String createAccessToken(Authentication authentication) {
@@ -65,7 +60,7 @@ public class JwtTokenProvider {
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
-        Long userId = userDetails.getUser().getId();
+        Long userId = userDetails.getId();
 
         long now = (new Date()).getTime();
         Date validity = new Date(now + tokenValidTime);
@@ -86,18 +81,18 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+        String authorities = claims.get(AUTHORITIES_KEY).toString();
+        Collection<? extends GrantedAuthority> authorityList =
+                Arrays.stream(authorities.split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
         String email = claims.getSubject();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new JwtBusinessException(JwtErrorCode.USER_NOT_FOUND));
+        Long userId = ((Number) claims.get("userId")).longValue();
 
-        CustomUserDetails principal = new CustomUserDetails(user);
+        CustomUserDetails principal = new CustomUserDetails(userId, email, authorities);
 
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        return new UsernamePasswordAuthenticationToken(principal, token, authorityList);
     }
 
     public boolean validateToken(String token) {
@@ -105,13 +100,13 @@ public class JwtTokenProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            throw new JwtBusinessException(JwtErrorCode.INVALID_TOKEN);
+            throw new AuthBusinessException(AuthErrorCode.INVALID_TOKEN);
         } catch (ExpiredJwtException e) {
-            throw new JwtBusinessException(JwtErrorCode.EXPIRED_TOKEN);
+            throw new AuthBusinessException(AuthErrorCode.EXPIRED_TOKEN);
         } catch (UnsupportedJwtException e) {
-            throw new JwtBusinessException(JwtErrorCode.UNSUPPORTED_TOKEN);
+            throw new AuthBusinessException(AuthErrorCode.UNSUPPORTED_TOKEN);
         } catch (IllegalArgumentException e) {
-            throw new JwtBusinessException(JwtErrorCode.EMPTY_CLAIMS);
+            throw new AuthBusinessException(AuthErrorCode.EMPTY_CLAIMS);
         }
     }
 }
