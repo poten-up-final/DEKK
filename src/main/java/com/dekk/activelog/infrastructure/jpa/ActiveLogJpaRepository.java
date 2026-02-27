@@ -1,4 +1,4 @@
-package com.dekk.activelog.infrastructure.repository;
+package com.dekk.activelog.infrastructure.jpa;
 
 import com.dekk.activelog.domain.model.ActiveLog;
 import org.springframework.data.jpa.repository.JpaRepository;
