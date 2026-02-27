@@ -9,6 +9,7 @@ import com.dekk.card.domain.model.enums.ProductGender;
 import com.dekk.crawl.domain.exception.CrawlBusinessException;
 import com.dekk.crawl.domain.exception.CrawlErrorCode;
 import com.dekk.crawl.domain.parser.CrawlDataParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -35,21 +36,23 @@ public class MusinsaCrawlDataParser implements CrawlDataParser {
 
     @Override
     public List<CardCreateCommand> parse(String rawData) {
+        JsonNode rootArray;
         try {
-            JsonNode rootArray = objectMapper.readTree(rawData);
-            List<CardCreateCommand> commands = new ArrayList<>();
-
-            for (JsonNode snap : rootArray) {
-                CardCreateCommand command = parseSnap(snap);
-                if (command != null) {
-                    commands.add(command);
-                }
-            }
-
-            return commands;
-        } catch (Exception e) {
+            rootArray = objectMapper.readTree(rawData);
+        } catch (JsonProcessingException e) {
             throw new CrawlBusinessException(CrawlErrorCode.RAW_DATA_PARSE_FAILED);
         }
+
+        List<CardCreateCommand> commands = new ArrayList<>();
+
+        for (JsonNode snap : rootArray) {
+            CardCreateCommand command = parseSnap(snap);
+            if (command != null) {
+                commands.add(command);
+            }
+        }
+
+        return commands;
     }
 
     private CardCreateCommand parseSnap(JsonNode snap) {
