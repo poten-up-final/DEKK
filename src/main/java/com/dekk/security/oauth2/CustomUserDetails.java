@@ -54,14 +54,22 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     // 소셜 로그인 회원이므로 계정 상태는 기본적으로 모두 활성화(true) 처리
     //Todo : 추후에 관리자 로그인 및 자체 로그인이 추가 된다면 소셜 로그인 회원을 구분하여 계정 상태 관리 필요
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true;
+    }
 }
