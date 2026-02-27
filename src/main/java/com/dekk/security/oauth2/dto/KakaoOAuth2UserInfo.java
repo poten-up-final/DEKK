@@ -5,7 +5,7 @@ import com.dekk.user.domain.model.enums.Provider;
 import com.dekk.security.oauth2.exception.CustomOAuth2Exception;
 
 import java.util.Map;
-import java.util.Optional;
+
 
 public class KakaoOAuth2UserInfo implements OAuth2UserInfo {
 
@@ -13,19 +13,21 @@ public class KakaoOAuth2UserInfo implements OAuth2UserInfo {
     private final Map<String, Object> kakaoAccount;
     private final Map<String, Object> profile;
 
-    @SuppressWarnings("unchecked")
+
     public KakaoOAuth2UserInfo(Map<String, Object> attributes) {
         this.attributes = attributes;
-        this.kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
 
-        if(this.kakaoAccount == null){
+        Object kakaoAccountObj = attributes.get("kakao_account");
+        if (!(kakaoAccountObj instanceof Map)) {
             throw new CustomOAuth2Exception(AuthErrorCode.MISSING_USER_INFO);
         }
+        this.kakaoAccount = (Map<String, Object>) kakaoAccountObj;
 
-
-        this.profile = Optional.ofNullable(
-                (Map<String, Object>) kakaoAccount.get("profile")
-        ).orElseThrow(() -> new  CustomOAuth2Exception(AuthErrorCode.MISSING_USER_INFO));
+        Object profileObj = this.kakaoAccount.get("profile");
+        if (!(profileObj instanceof Map)) {
+            throw new CustomOAuth2Exception(AuthErrorCode.MISSING_USER_INFO);
+        }
+        this.profile = (Map<String, Object>) profileObj;
     }
 
     @Override
