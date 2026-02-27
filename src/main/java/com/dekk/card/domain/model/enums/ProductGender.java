@@ -12,4 +12,17 @@ public enum ProductGender {
     UNDEFINED("미정");
 
     private final String description;
+
+    public static ProductGender musinsaParse(String value) {
+        if (value == null || value.isBlank()) {
+            return UNDEFINED;
+        }
+
+        return switch (value.trim().toUpperCase()) {
+            case "WOMEN" -> ProductGender.WOMEN;
+            case "MEN" -> ProductGender.MEN;
+            case "ALL" -> ProductGender.UNISEX;
+            default -> ProductGender.UNDEFINED;
+        };
+    }
 }
