@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum DeckResultCode implements ResultCode {
     DEFAULT_DECK_CREATE_SUCCESS(HttpStatus.OK, "SD20001", "기본 보관함 생성 성공"),
-    CARD_SAVE_SUCCESS(HttpStatus.OK, "SD20002", "보관함 카드 저장 성공");
+    CARD_SAVE_SUCCESS(HttpStatus.OK, "SD20002", "보관함 카드 저장 성공"),
+    DECK_CARD_LIST_SUCCESS(HttpStatus.OK, "SD20003", "보관함 카드 목록 조회 성공"),
+    ;
 
     private final HttpStatus status;
     private final String code;
