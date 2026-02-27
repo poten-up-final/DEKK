@@ -1,4 +1,4 @@
-package com.dekk.security.jwt.exception;
+package com.dekk.auth.jwt.exception;
 
 import com.dekk.common.error.ErrorCode;
 import org.springframework.http.HttpStatus;

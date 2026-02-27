@@ -1,8 +1,8 @@
-package com.dekk.security.jwt.filter;
+package com.dekk.auth.jwt.filter;
 
 
-import com.dekk.security.jwt.JwtTokenProvider;
-import com.dekk.security.jwt.exception.JwtBusinessException;
+import com.dekk.auth.jwt.JwtTokenProvider;
+import com.dekk.auth.jwt.exception.JwtBusinessException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,9 +20,9 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
+    private final JwtTokenProvider jwtTokenProvider;
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
@@ -34,27 +34,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String jwt = resolveToken(request);
 
-        if (StringUtils.hasText(jwt)) {
-            try {
-                if (jwtTokenProvider.validateToken(jwt)) {
-                    Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), request.getRequestURI());
-                }
-            } catch (JwtBusinessException e) {
-                log.debug("JWT 인증 실패: {}, uri: {}", e.getMessage(), request.getRequestURI());
-            }
-        } else {
+        if (!StringUtils.hasText(jwt)) {
             log.debug("유효한 JWT 토큰이 없습니다, uri: {}", request.getRequestURI());
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            if (jwtTokenProvider.validateToken(jwt)) {
+                Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), request.getRequestURI());
+            }
+        } catch (JwtBusinessException e) {
+            log.debug("JWT 인증 실패 [{}]: {}, uri: {}",
+                    e.errorCode().code(),
+                    e.errorCode().message(),
+                    request.getRequestURI());
+
+            filterChain.doFilter(request, response);
+        }
     }
 
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(7);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(BEARER_PREFIX.length());
         }
         return null;
     }

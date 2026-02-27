@@ -1,11 +1,16 @@
-package com.dekk.security.jwt;
+package com.dekk.auth.jwt;
 
-import com.dekk.security.jwt.exception.JwtBusinessException;
-import com.dekk.security.jwt.exception.JwtErrorCode;
+import com.dekk.auth.jwt.exception.JwtBusinessException;
+import com.dekk.auth.jwt.exception.JwtErrorCode;
 import com.dekk.security.oauth2.CustomUserDetails;
 import com.dekk.user.domain.model.User;
 import com.dekk.user.domain.repository.UserRepository;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -87,13 +93,13 @@ public class JwtTokenProvider {
 
         String email = claims.getSubject();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new JwtBusinessException(jwtErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new JwtBusinessException(JwtErrorCode.USER_NOT_FOUND));
 
         CustomUserDetails principal = new CustomUserDetails(user);
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
-    
+
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);

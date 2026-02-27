@@ -1,7 +1,7 @@
 package com.dekk.security.config;
 
 import com.dekk.auth.application.CustomOAuth2UserService;
-import com.dekk.security.jwt.filter.JwtAuthenticationFilter;
+import com.dekk.auth.jwt.filter.JwtAuthenticationFilter;
 import com.dekk.security.oauth2.handler.OAuth2FailureHandler;
 import com.dekk.security.oauth2.handler.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;

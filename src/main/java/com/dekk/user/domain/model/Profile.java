@@ -108,7 +108,6 @@ public class Profile {
         }
     }
 
-
     private void validateWeight(int weight) {
         if (weight < MIN_WEIGHT || weight > MAX_WEIGHT) {
             throw new UserBusinessException(UserErrorCode.INVALID_PROFILE_WEIGHT);
