@@ -13,6 +13,7 @@ public enum CrawlErrorCode implements ErrorCode {
     RAW_DATA_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "ECR50001", "원본 데이터 파싱에 실패했습니다"),
     PLATFORM_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ECR40003", "플랫폼은 필수 값입니다"),
     RAW_DATA_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ECR40004", "원본 데이터는 필수 값입니다"),
+    UNSUPPORTED_PLATFORM(HttpStatus.BAD_REQUEST, "ECR40006", "지원하지 않는 플랫폼입니다"),
     ;
 
     private final HttpStatus httpStatus;
