@@ -46,6 +46,26 @@
         </rollingPolicy>
     </appender>
 
+    <appender name="CRAWL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/dekk-crawl.log</file>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/dekk-crawl-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="ASYNC_CRAWL_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="CRAWL_FILE" />
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
     <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="FILE" />
         <queueSize>512</queueSize>
@@ -65,6 +85,10 @@
             <appender-ref ref="ASYNC_ERROR_FILE" />
         </root>
         <logger name="com.dekk" level="DEBUG" />
+        <logger name="CRAWL" level="WARN" additivity="false">
+            <appender-ref ref="ASYNC_CRAWL_FILE" />
+            <appender-ref ref="CONSOLE" />
+        </logger>
         <logger name="org.hibernate.SQL" level="DEBUG" />
         <logger name="org.hibernate.orm.jdbc.bind" level="TRACE" />
     </springProfile>
@@ -76,5 +100,9 @@
             <appender-ref ref="ASYNC_ERROR_FILE" />
         </root>
         <logger name="com.dekk" level="INFO" />
+        <logger name="CRAWL" level="WARN" additivity="false">
+            <appender-ref ref="ASYNC_CRAWL_FILE" />
+            <appender-ref ref="CONSOLE" />
+        </logger>
     </springProfile>
 </configuration>

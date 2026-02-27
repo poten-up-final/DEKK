@@ -1,8 +1,11 @@
 package com.dekk.common.error;
 
+import com.dekk.crawl.domain.exception.CrawlBusinessException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,6 +16,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger crawlLog = LoggerFactory.getLogger("CRAWL");
+
+    /**
+     * 크롤링 비즈니스 예외 처리
+     * */
+    @ExceptionHandler(CrawlBusinessException.class)
+    public ResponseEntity<ErrorResponse> handleCrawlBusinessException(CrawlBusinessException e) {
+        ErrorCode errorCode = e.errorCode();
+        crawlLog.warn("Crawl Exception : [Code: {}] {}", errorCode.code(), errorCode.message(), e);
+        return ResponseEntity
+            .status(errorCode.status())
+            .body(ErrorResponse.from(errorCode));
+    }
 
     /**
      * 비즈니스 예외 처리
