@@ -1,14 +1,11 @@
-package com.dekk.domain.user.repository;
+package com.dekk.user.infrastructure.jpa;
 
-import com.dekk.domain.user.model.Provider;
-import com.dekk.domain.user.entity.User;
+import com.dekk.user.domain.model.User;
+import com.dekk.user.domain.model.enums.Provider;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-
+public interface UserJpaRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
-
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
 }
