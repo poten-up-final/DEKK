@@ -17,7 +17,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.SQLDelete;
 
 @Entity
@@ -36,7 +35,6 @@ import org.hibernate.annotations.SQLDelete;
     }
 )
 @SQLDelete(sql = "UPDATE active_logs SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
-@FilterDef(name = "deletedFilter", defaultCondition = "deleted_at IS NULL")
 @Filter(name = "deletedFilter")
 public class ActiveLog extends BaseTimeEntity {
 
