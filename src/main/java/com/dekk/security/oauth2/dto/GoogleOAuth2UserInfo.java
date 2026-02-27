@@ -1,6 +1,6 @@
 package com.dekk.security.oauth2.dto;
 
-import com.dekk.security.oauth2.exception.AuthErrorCode;
+import com.dekk.security.oauth2.exception.OAuth2ErrorCode;
 import com.dekk.user.domain.model.enums.Provider;
 import com.dekk.security.oauth2.exception.CustomOAuth2Exception;
 
@@ -12,11 +12,11 @@ public class GoogleOAuth2UserInfo implements OAuth2UserInfo {
 
     public GoogleOAuth2UserInfo(Map<String, Object> attributes) {
         if (attributes == null || attributes.isEmpty()) {
-            throw new CustomOAuth2Exception(AuthErrorCode.MISSING_USER_INFO);
+            throw new CustomOAuth2Exception(OAuth2ErrorCode.MISSING_USER_INFO);
         }
 
         if (attributes.get("sub") == null || attributes.get("email") == null) {
-            throw new CustomOAuth2Exception(AuthErrorCode.MISSING_USER_INFO);
+            throw new CustomOAuth2Exception(OAuth2ErrorCode.MISSING_USER_INFO);
         }
 
         this.attributes = attributes;

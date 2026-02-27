@@ -1,6 +1,6 @@
 package com.dekk.user.domain.model.enums;
 
-import com.dekk.security.oauth2.exception.AuthErrorCode;
+import com.dekk.security.oauth2.exception.OAuth2ErrorCode;
 import com.dekk.security.oauth2.exception.CustomOAuth2Exception;
 
 import java.util.Arrays;
@@ -13,6 +13,6 @@ public enum Provider {
         return Arrays.stream(Provider.values())
                 .filter(p -> p.name().equalsIgnoreCase(registrationId))
                 .findFirst()
-                .orElseThrow(() -> new CustomOAuth2Exception(AuthErrorCode.UNSUPPORTED_PROVIDER));
+                .orElseThrow(() -> new CustomOAuth2Exception(OAuth2ErrorCode.UNSUPPORTED_PROVIDER));
     }
 }

@@ -1,6 +1,6 @@
 package com.dekk.security.oauth2.dto;
 
-import com.dekk.security.oauth2.exception.AuthErrorCode;
+import com.dekk.security.oauth2.exception.OAuth2ErrorCode;
 import com.dekk.user.domain.model.enums.Provider;
 import com.dekk.security.oauth2.exception.CustomOAuth2Exception;
 
@@ -19,13 +19,13 @@ public class KakaoOAuth2UserInfo implements OAuth2UserInfo {
 
         Object kakaoAccountObj = attributes.get("kakao_account");
         if (!(kakaoAccountObj instanceof Map)) {
-            throw new CustomOAuth2Exception(AuthErrorCode.MISSING_USER_INFO);
+            throw new CustomOAuth2Exception(OAuth2ErrorCode.MISSING_USER_INFO);
         }
         this.kakaoAccount = (Map<String, Object>) kakaoAccountObj;
 
         Object profileObj = this.kakaoAccount.get("profile");
         if (!(profileObj instanceof Map)) {
-            throw new CustomOAuth2Exception(AuthErrorCode.MISSING_USER_INFO);
+            throw new CustomOAuth2Exception(OAuth2ErrorCode.MISSING_USER_INFO);
         }
         this.profile = (Map<String, Object>) profileObj;
     }
