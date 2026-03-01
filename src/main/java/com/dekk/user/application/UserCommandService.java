@@ -1,0 +1,53 @@
+package com.dekk.user.application;
+
+import com.dekk.user.application.command.UserOnboardingCommand;
+import com.dekk.user.application.command.UserProfileUpdateCommand;
+import com.dekk.user.domain.exception.UserBusinessException;
+import com.dekk.user.domain.exception.UserErrorCode;
+import com.dekk.user.domain.model.User;
+import com.dekk.user.domain.repository.ProfileRepository;
+import com.dekk.user.domain.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class UserCommandService {
+
+    private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
+
+    public void onboardUser(Long userId, UserOnboardingCommand command) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserBusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        if (profileRepository.existsByNickname(command.nickname())) {
+            throw new UserBusinessException(UserErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        user.completeOnboarding(command);
+    }
+
+    public void updateProfileInfo(Long userId, UserProfileUpdateCommand command) {
+        User user = userRepository.findWithProfileById(userId)
+                .orElseThrow(() -> new UserBusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        // 닉네임이 변경되었을 경우에만 중복 검사 실행
+        if (command.nickname() != null && !command.nickname().equals(user.getProfile().getNickname())) {
+            if (profileRepository.existsByNickname(command.nickname())) {
+                throw new UserBusinessException(UserErrorCode.DUPLICATE_NICKNAME);
+            }
+        }
+
+        user.updateProfileInfo(command);
+    }
+
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserBusinessException(UserErrorCode.USER_NOT_FOUND));
+
+        user.deleteUser();
+    }
+}
