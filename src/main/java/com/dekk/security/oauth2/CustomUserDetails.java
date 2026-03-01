@@ -19,18 +19,23 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     private final String role;
 
     @Getter
+    private final String status;
+
+    @Getter
     private final Map<String, Object> attributes;
 
     public CustomUserDetails(User user, Map<String, Object> attributes) {
         this.id = user.getId();
         this.email = user.getEmail();
         this.role = user.getRole().getKey();
+        this.status = user.getStatus().name();
         this.attributes = attributes;
     }
-    public CustomUserDetails(Long id, String email, String role) {
+    public CustomUserDetails(Long id, String email, String role, String status) {
         this.id = id;
         this.email = email;
         this.role = role;
+        this.status = status;
         this.attributes = Collections.emptyMap();
     }
 

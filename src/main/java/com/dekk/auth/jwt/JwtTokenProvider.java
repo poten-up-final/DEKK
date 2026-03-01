@@ -60,6 +60,7 @@ public class JwtTokenProvider {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
         Long userId = userDetails.getId();
+        String status = userDetails.getStatus();
 
         long now = (new Date()).getTime();
         Date validity = new Date(now + tokenValidTime);
@@ -68,6 +69,7 @@ public class JwtTokenProvider {
                 .setSubject(email)
                 .claim(AUTHORITIES_KEY, authorities)
                 .claim("userId", userId)
+                .claim("status", status)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .setExpiration(validity)
                 .compact();
@@ -80,18 +82,20 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-        String authorities = claims.get(AUTHORITIES_KEY).toString();
-        Collection<? extends GrantedAuthority> authorityList =
-                Arrays.stream(authorities.split(","))
+        String role = claims.get(AUTHORITIES_KEY).toString();
+
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(role.split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
         String email = claims.getSubject();
         Long userId = ((Number) claims.get("userId")).longValue();
+        String status = claims.get("status", String.class);
 
-        CustomUserDetails principal = new CustomUserDetails(userId, email, authorities);
+        CustomUserDetails principal = new CustomUserDetails(userId, email, role, status);
 
-        return new UsernamePasswordAuthenticationToken(principal, token, authorityList);
+        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
     public boolean validateToken(String token) {
