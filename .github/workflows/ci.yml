@@ -25,6 +25,8 @@ jobs:
         run: chmod +x gradlew
 
       - name: 4. 테스트 및 빌드 수행
+        env:
+          SPRING_PROFILES_ACTIVE: test
         run: ./gradlew clean build -Dspring.profiles.active=test
 
       - name: 5. 빌드 결과 확인
