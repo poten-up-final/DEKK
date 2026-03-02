@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/w/v1/crawl")
+@RequestMapping("/i/v1/crawl")
 @RequiredArgsConstructor
 public class CrawlController implements CrawlApi {
 
