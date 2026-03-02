@@ -28,6 +28,7 @@ public interface CrawlApi {
                     description = "배치가 생성되었습니다",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CrawlBatchCreateResponse.class),
                             examples = @ExampleObject(value = """
                                     {"code": "SCR20101", "message": "배치가 생성되었습니다", "data": {"batchId": 1, "platform": "MUSINSA", "status": "COLLECTING"}}
                                     """)
@@ -54,6 +55,7 @@ public interface CrawlApi {
                     description = "원본 데이터가 수신되었습니다",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CrawlRawDataCreateResponse.class),
                             examples = @ExampleObject(value = """
                                     {"code": "SCR20102", "message": "원본 데이터가 수신되었습니다", "data": {"rawDataId": 1, "status": "PENDING"}}
                                     """)
@@ -94,6 +96,7 @@ public interface CrawlApi {
                     description = "수집이 완료되었습니다",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class),
                             examples = @ExampleObject(value = """
                                     {"code": "SCR20001", "message": "수집이 완료되었습니다"}
                                     """)
