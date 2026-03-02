@@ -8,6 +8,7 @@ public record ProductCreateCommand(
     String originId,
     String option,
     boolean isSimilar,
-    String productUrl
+    String productUrl,
+    boolean isActive
 ) {
 }

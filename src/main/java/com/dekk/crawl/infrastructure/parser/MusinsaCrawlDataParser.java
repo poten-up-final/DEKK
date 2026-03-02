@@ -194,11 +194,15 @@ public class MusinsaCrawlDataParser implements CrawlDataParser {
                 continue;
             }
 
+            String originUrl = detail.path("originUrl").asText(null);
             String imageUrl = detail.path("imageUrl").asText(null);
-            ProductImageCreateCommand productImage = new ProductImageCreateCommand(imageUrl, null, false);
+            boolean isUploaded = detail.path("isUploaded").asBoolean(false);
+            ProductImageCreateCommand productImage = new ProductImageCreateCommand(originUrl, imageUrl, isUploaded);
 
             String option = optionsByGoodsNo.get(goodsNo);
             boolean isMatched = matchedByGoodsNo.getOrDefault(goodsNo, false);
+
+            boolean isActive = imageUrl != null && !imageUrl.isEmpty();
 
             ProductCreateCommand product = new ProductCreateCommand(
                     productImage,
@@ -208,7 +212,8 @@ public class MusinsaCrawlDataParser implements CrawlDataParser {
                     goodsNo,
                     option,
                     !isMatched,
-                    detail.path("linkUrl").asText(null)
+                    detail.path("linkUrl").asText(null),
+                    isActive
             );
 
             products.add(product);
