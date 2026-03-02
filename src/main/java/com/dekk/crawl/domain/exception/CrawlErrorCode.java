@@ -6,14 +6,17 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum CrawlErrorCode implements ErrorCode {
-    BATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "ECR40401", "배치를 찾을 수 없습니다"),
     BATCH_NOT_COLLECTING(HttpStatus.BAD_REQUEST, "ECR40001", "수집 중인 배치가 아닙니다"),
     BATCH_NOT_COLLECTED(HttpStatus.BAD_REQUEST, "ECR40002", "수집 완료된 배치가 아닙니다"),
-    BATCH_NOT_PROCESSING(HttpStatus.BAD_REQUEST, "ECR40005", "정제 처리 중인 배치가 아닙니다"),
-    RAW_DATA_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "ECR50001", "원본 데이터 파싱에 실패했습니다"),
-    PLATFORM_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ECR40003", "플랫폼은 필수 값입니다"),
-    RAW_DATA_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ECR40004", "원본 데이터는 필수 값입니다"),
+    BATCH_NOT_PROCESSING(HttpStatus.BAD_REQUEST, "ECR40003", "정제 처리 중인 배치가 아닙니다"),
+    PLATFORM_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ECR40004", "플랫폼은 필수 값입니다"),
+    RAW_DATA_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ECR40005", "원본 데이터는 필수 값입니다"),
     UNSUPPORTED_PLATFORM(HttpStatus.BAD_REQUEST, "ECR40006", "지원하지 않는 플랫폼입니다"),
+
+    BATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "ECR40401", "배치를 찾을 수 없습니다"),
+    RAW_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "ECR40402", "원본 데이터를 찾을 수 없습니다"),
+
+    RAW_DATA_PARSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "ECR50001", "원본 데이터 파싱에 실패했습니다"),
     ;
 
     private final HttpStatus httpStatus;

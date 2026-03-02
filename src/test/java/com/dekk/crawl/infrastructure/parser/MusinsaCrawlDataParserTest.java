@@ -4,7 +4,7 @@ import com.dekk.card.application.command.CardCreateCommand;
 import com.dekk.card.application.command.ProductCreateCommand;
 import com.dekk.card.domain.model.enums.Platform;
 import com.dekk.card.domain.model.enums.ProductGender;
-import com.dekk.crawl.domain.exception.CrawlBusinessException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -108,7 +108,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("snap 1건을 CardCreateCommand 1건으로 파싱한다")
-        void parseSingleSnap() {
+        void parseSingleSnap() throws JsonProcessingException {
             List<CardCreateCommand> result = parser.parse(RAW_DATA);
 
             assertThat(result).hasSize(1);
@@ -116,7 +116,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("originId를 올바르게 파싱한다")
-        void parseOriginId() {
+        void parseOriginId() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
 
             assertThat(command.originId()).isEqualTo("1475883068452566428");
@@ -124,7 +124,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("platform은 MUSINSA로 고정된다")
-        void parsePlatform() {
+        void parsePlatform() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
 
             assertThat(command.platform()).isEqualTo(Platform.MUSINSA);
@@ -132,7 +132,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("snapDisplayStatus가 DISPLAY이면 isActive는 true이다")
-        void parseIsActive() {
+        void parseIsActive() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
 
             assertThat(command.isActive()).isTrue();
@@ -140,7 +140,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("model의 height, weight를 파싱한다")
-        void parseModelInfo() {
+        void parseModelInfo() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
 
             assertThat(command.height()).isEqualTo(168);
@@ -149,7 +149,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("tags를 쉼표로 구분하여 파싱한다")
-        void parseTags() {
+        void parseTags() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
 
             assertThat(command.tags()).isEqualTo("개강룩,개강코디,광고,꾸안꾸,무신사,어반디타입,오늘의스냅,출근룩");
@@ -157,7 +157,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("medias[0]의 path를 카드 이미지 originUrl로 파싱한다")
-        void parseCardImage() {
+        void parseCardImage() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
 
             assertThat(command.cardImage().originUrl())
@@ -168,7 +168,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("goods_detail_list에서 상품 정보를 파싱한다")
-        void parseProduct() {
+        void parseProduct() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
             List<ProductCreateCommand> products = command.productCreateCommands();
 
@@ -184,7 +184,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("goods의 options에서 goodsNo 매칭으로 옵션을 파싱한다")
-        void parseProductOption() {
+        void parseProductOption() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
             ProductCreateCommand product = command.productCreateCommands().get(0);
 
@@ -193,7 +193,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("goods의 isMatched가 true이면 isSimilar는 false이다")
-        void parseIsSimilar() {
+        void parseIsSimilar() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
             ProductCreateCommand product = command.productCreateCommands().get(0);
 
@@ -202,7 +202,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("상품 이미지 originUrl을 파싱하고 imageUrl은 null, isUploaded는 false이다")
-        void parseProductImage() {
+        void parseProductImage() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
             ProductCreateCommand product = command.productCreateCommands().get(0);
 
@@ -214,7 +214,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("model.gender가 WOMEN이면 ProductGender.WOMEN으로 파싱한다")
-        void parseGender() {
+        void parseGender() throws JsonProcessingException {
             CardCreateCommand command = parser.parse(RAW_DATA).get(0);
             ProductCreateCommand product = command.productCreateCommands().get(0);
 
@@ -228,7 +228,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("id가 없는 snap은 건너뛴다")
-        void skipSnapWithoutId() {
+        void skipSnapWithoutId() throws JsonProcessingException {
             String rawData = """
                     [{"model": {}, "goods": [], "tags": [], "medias": [],
                       "status": {"snapDisplayStatus": "DISPLAY"}, "goods_detail_list": []}]
@@ -241,7 +241,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("tags가 빈 배열이면 null을 반환한다")
-        void emptyTags() {
+        void emptyTags() throws JsonProcessingException {
             String rawData = """
                     [{"id": "123", "model": {}, "goods": [], "tags": [], "medias": [],
                       "status": {"snapDisplayStatus": "DISPLAY"}, "goods_detail_list": []}]
@@ -254,7 +254,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("medias가 비어있으면 카드 이미지 originUrl은 null이다")
-        void emptyMedias() {
+        void emptyMedias() throws JsonProcessingException {
             String rawData = """
                     [{"id": "123", "model": {}, "goods": [], "tags": [], "medias": [],
                       "status": {"snapDisplayStatus": "DISPLAY"}, "goods_detail_list": []}]
@@ -267,7 +267,7 @@ class MusinsaCrawlDataParserTest {
 
         @Test
         @DisplayName("model 정보가 없으면 height, weight는 null이다")
-        void emptyModel() {
+        void emptyModel() throws JsonProcessingException {
             String rawData = """
                     [{"id": "123", "model": {}, "goods": [], "tags": [], "medias": [],
                       "status": {"snapDisplayStatus": "DISPLAY"}, "goods_detail_list": []}]
@@ -283,12 +283,12 @@ class MusinsaCrawlDataParserTest {
         @DisplayName("잘못된 JSON이면 CrawlBusinessException을 던진다")
         void invalidJson() {
             assertThatThrownBy(() -> parser.parse("invalid json"))
-                    .isInstanceOf(CrawlBusinessException.class);
+                    .isInstanceOf(JsonProcessingException.class);
         }
 
         @Test
         @DisplayName("goods에서 isMatched가 false이면 isSimilar는 true이다")
-        void unmatchedGoodsIsSimilar() {
+        void unmatchedGoodsIsSimilar() throws JsonProcessingException {
             String rawData = """
                     [{"id": "123", "model": {}, "tags": [], "medias": [],
                       "status": {"snapDisplayStatus": "DISPLAY"},

@@ -35,14 +35,8 @@ public class MusinsaCrawlDataParser implements CrawlDataParser {
     }
 
     @Override
-    public List<CardCreateCommand> parse(String rawData) {
-        JsonNode rootArray;
-
-        try {
-            rootArray = objectMapper.readTree(rawData);
-        } catch (JsonProcessingException e) {
-            throw new CrawlBusinessException(CrawlErrorCode.RAW_DATA_PARSE_FAILED);
-        }
+    public List<CardCreateCommand> parse(String rawData) throws JsonProcessingException {
+        JsonNode rootArray = objectMapper.readTree(rawData);
 
         List<CardCreateCommand> commands = new ArrayList<>();
 
