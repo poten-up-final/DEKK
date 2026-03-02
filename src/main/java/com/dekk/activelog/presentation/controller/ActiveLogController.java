@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/w/v1/cards")
+@RequestMapping("/w/v1/activelogs")
 @RequiredArgsConstructor
 public class ActiveLogController implements ActiveLogApi {
 
