@@ -24,6 +24,8 @@ cloud:
 app:
   oauth2:
     redirect-uri: "http://localhost:3000/oauth2/redirect"
+  cors:
+    allowed-origins: "http://localhost:3000"
 
 jwt:
   secret: "dGhpcy1pcy1hLWR1bW15LXNlY3JldC1rZXktZm9yLXRlc3RpbmctcHVycG9zZXMtb25seS0xMjM="
