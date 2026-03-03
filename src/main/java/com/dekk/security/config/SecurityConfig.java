@@ -49,9 +49,13 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/v3/api-docs",
+<<<<<<< DK-131
                                 "/w/v1/guests/cards/**",
                                 "/w/v1/cards/*/swipe",
                                 "/i/v1/crawl/**"
+=======
+                                "/w/v1/guests/cards/**"
+>>>>>>> develop
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
