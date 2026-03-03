@@ -48,14 +48,7 @@ public class DeckQueryService {
             MemberCardResult cardInfo = cardMap.get(deckCard.getCardId());
 
             if (cardInfo == null) {
-                return new MyDeckCardResult(
-                    deckCard.getCardId(),
-                    null,
-                    null,
-                    null,
-                    Collections.emptyList(),
-                    Collections.emptyList()
-                );
+                    return MyDeckCardResult.empty(deckCard.getCardId());
             }
 
             List<MyDeckCardResult.ProductDetail> productDetails = cardInfo.products().stream()
