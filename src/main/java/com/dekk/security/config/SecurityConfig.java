@@ -50,7 +50,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/v3/api-docs",
                                 "/w/v1/cards",
-                                "/w/v1/cards/*/swipe"
+                                "/w/v1/cards/*/swipe",
+                                "/w/v1/guests/cards/**",
+                                "/i/v1/crawl/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
