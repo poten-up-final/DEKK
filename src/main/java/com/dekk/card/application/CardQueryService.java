@@ -2,7 +2,7 @@ package com.dekk.card.application;
 
 import com.dekk.card.application.dto.result.GuestCardResult;
 import com.dekk.card.application.dto.result.MemberCardResult;
-import com.dekk.card.domain.model.Card;
+import com.dekk.card.domain.model.enums.CardStatus;
 import com.dekk.card.domain.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,12 +20,12 @@ public class CardQueryService {
     private final CardRepository cardRepository;
 
     public Page<GuestCardResult> getCardsForGuest(Pageable pageable) {
-        return cardRepository.findActiveCardsWithImage(pageable)
+        return cardRepository.findCardsWithImageByStatus(CardStatus.APPROVED, pageable)
             .map(GuestCardResult::from);
     }
 
     public Page<MemberCardResult> getCardsForMember(Pageable pageable) {
-        return cardRepository.findActiveCardsWithProducts(pageable)
+        return cardRepository.findCardsWithProductsByStatus(CardStatus.APPROVED, pageable)
             .map(MemberCardResult::from);
     }
 

@@ -1,6 +1,7 @@
 package com.dekk.card.infrastructure;
 
 import com.dekk.card.domain.model.Card;
+import com.dekk.card.domain.model.enums.CardStatus;
 import com.dekk.card.domain.model.enums.Platform;
 import com.dekk.card.domain.repository.CardRepository;
 import com.dekk.card.infrastructure.jpa.CardJpaRepository;
@@ -32,13 +33,13 @@ public class CardRepositoryImpl implements CardRepository {
     }
 
     @Override
-    public Page<Card> findActiveCardsWithImage(Pageable pageable) {
-        return cardJpaRepository.findActiveCardsWithImage(pageable);
+    public Page<Card> findCardsWithImageByStatus(CardStatus status, Pageable pageable) {
+        return cardJpaRepository.findCardsWithImageByStatus(status, pageable);
     }
 
     @Override
-    public Page<Card> findActiveCardsWithProducts(Pageable pageable) {
-        return cardJpaRepository.findActiveCardsWithProducts(pageable);
+    public Page<Card> findCardsWithProductsByStatus(CardStatus status, Pageable pageable) {
+        return cardJpaRepository.findCardsWithProductsByStatus(status, pageable);
     }
 
     @Override
