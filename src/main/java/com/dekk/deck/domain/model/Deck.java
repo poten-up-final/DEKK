@@ -54,6 +54,13 @@ public class Deck extends BaseTimeEntity {
         return new Deck(userId, name, false);
     }
 
+    public void updateCustomName(String newName) {
+        validateCustomModifiable();
+        validateBase(this.userId, newName);
+        validateCustomNameLength(newName);
+        this.name = newName;
+    }
+
     private static void validateBase(Long userId, String name) {
         if (userId == null) {
             throw new DeckBusinessException(DeckErrorCode.USER_ID_IS_REQUIRED_TO_CREATE);
@@ -66,6 +73,12 @@ public class Deck extends BaseTimeEntity {
     private static void validateCustomNameLength(String name) {
         if (name.length() < 1 || name.length() > 15) {
             throw new DeckBusinessException(DeckErrorCode.CUSTOM_DECK_NAME_LENGTH_INVALID);
+        }
+    }
+
+    private void validateCustomModifiable() {
+        if (this.isDefault) {
+            throw new DeckBusinessException(DeckErrorCode.DEFAULT_DECK_CANNOT_BE_MODIFIED);
         }
     }
 }
