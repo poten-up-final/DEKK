@@ -3,6 +3,7 @@ package com.dekk.card.domain.model;
 import com.dekk.card.application.command.CardCreateCommand;
 import com.dekk.card.domain.exception.CardBusinessException;
 import com.dekk.card.domain.exception.CardErrorCode;
+import com.dekk.card.domain.model.enums.CardStatus;
 import com.dekk.card.domain.model.enums.Platform;
 import com.dekk.common.entity.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
@@ -44,8 +45,9 @@ public class Card extends BaseTimeEntity {
     @Column(name = "origin_id", nullable = false, updatable = false)
     private String originId;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private CardStatus status;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -59,7 +61,6 @@ public class Card extends BaseTimeEntity {
             CardImage cardImage,
             String tags,
             String originId,
-            Boolean isActive,
             Platform platform,
             Integer height,
             Integer weight
@@ -67,7 +68,7 @@ public class Card extends BaseTimeEntity {
         this.cardImage = cardImage;
         this.tags = tags;
         this.originId = originId;
-        this.isActive = isActive;
+        this.status = CardStatus.PENDING;
         this.platform = platform;
         this.height = height;
         this.weight = weight;
@@ -84,7 +85,6 @@ public class Card extends BaseTimeEntity {
                 cardImage,
                 command.tags(),
                 command.originId(),
-                command.isActive(),
                 command.platform(),
                 command.height(),
                 command.weight()
@@ -96,5 +96,9 @@ public class Card extends BaseTimeEntity {
                 .map(product -> CardProduct.create(card, product))
                 .forEach(card.cardProducts::add);
         return card;
+    }
+
+    public void approve() {
+        this.status = CardStatus.APPROVED;
     }
 }
