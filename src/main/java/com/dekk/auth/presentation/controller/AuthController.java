@@ -1,6 +1,7 @@
 package com.dekk.auth.presentation.controller;
 
 import com.dekk.auth.application.AuthCommandService;
+import com.dekk.auth.application.dto.result.TokenRefreshResult;
 import com.dekk.auth.presentation.request.TokenRefreshRequest;
 import com.dekk.auth.presentation.response.AuthResultCode;
 import com.dekk.auth.presentation.response.TokenResponse;
@@ -25,9 +26,9 @@ public class AuthController implements AuthApi {
     public ResponseEntity<ApiResponse<TokenResponse>> refreshToken(
             @Valid @RequestBody TokenRefreshRequest request
     ) {
-        TokenResponse tokenResponse = authCommandService.refreshToken(request.refreshToken());
+        TokenRefreshResult result = authCommandService.refreshToken(request.toCommand());
 
-        return ResponseEntity.ok(ApiResponse.of(AuthResultCode.TOKEN_REFRESH_SUCCESS, tokenResponse));
+        return ResponseEntity.ok(ApiResponse.of(AuthResultCode.TOKEN_REFRESH_SUCCESS, TokenResponse.from(result)));
     }
 
     @Override
