@@ -7,4 +7,5 @@ public interface DeckRepository {
     Deck save(Deck deck);
     Optional<Deck> findByUserIdAndIsDefaultTrue(Long userId);
     long countByUserIdAndIsDefaultFalse(Long userId);
+    Optional<Deck> findByIdAndUserId(Long id, Long userId);
 }

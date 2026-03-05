@@ -27,4 +27,9 @@ public class DeckRepositoryImpl implements DeckRepository {
     public long countByUserIdAndIsDefaultFalse(Long userId) {
         return deckJpaRepository.countByUserIdAndIsDefaultFalse(userId);
     }
+
+    @Override
+    public Optional<Deck> findByIdAndUserId(Long id, Long userId) {
+        return deckJpaRepository.findByIdAndUserId(id, userId);
+    }
 }
