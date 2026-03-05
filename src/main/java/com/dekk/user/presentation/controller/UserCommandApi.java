@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "사용자 정보 관리 API", description = "사용자 정보 및 상태 변경 API")
 public interface UserCommandApi {
 
-    @Operation(summary = "유저 온보딩", description = "소셜 로그인 후 최초 신체 정보 및 닉네임을 설정합니다.")
+    @Operation(summary = "유저 온보딩", description = "소셜 로그인 후 최초 신체 정보 및 닉네임을 설정하고, 기본 보관함을 자동 생성합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SU20001)"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
