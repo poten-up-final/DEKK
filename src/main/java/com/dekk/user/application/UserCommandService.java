@@ -1,5 +1,6 @@
 package com.dekk.user.application;
 
+import com.dekk.deck.application.DeckCommandService;
 import com.dekk.user.application.command.UserOnboardingCommand;
 import com.dekk.user.application.command.UserProfileUpdateCommand;
 import com.dekk.user.domain.exception.UserBusinessException;
@@ -18,6 +19,7 @@ public class UserCommandService {
 
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
+    private final DeckCommandService deckCommandService;
 
     public void onboardUser(Long userId, UserOnboardingCommand command) {
         User user = userRepository.findById(userId)
@@ -28,6 +30,9 @@ public class UserCommandService {
         }
 
         user.completeOnboarding(command);
+
+        deckCommandService.createDefaultDeck(user.getId());
+
     }
 
     public void updateProfileInfo(Long userId, UserProfileUpdateCommand command) {
