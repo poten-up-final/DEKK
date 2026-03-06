@@ -23,7 +23,7 @@ public class DeckCardCommandService {
     public void saveToDefaultDeck(Long userId, Long cardId) {
         Deck defaultDeck = getDefaultDeckByUserId(userId);
 
-        if (deckCardRepository.existsByDeckIdAndCardId(defaultDeck.getId(), cardId)) {
+        if (isCardAlreadyInDeck(defaultDeck.getId(), cardId)) {
             return;
         }
 
@@ -40,7 +40,7 @@ public class DeckCardCommandService {
     public void saveToCustomDeck(Long userId, Long customDeckId, Long cardId) {
         Deck customDeck = getCustomDeckByUserId(customDeckId, userId);
 
-        if (deckCardRepository.existsByDeckIdAndCardId(customDeck.getId(), cardId)) {
+        if (isCardAlreadyInDeck(customDeck.getId(), cardId)) {
             return;
         }
 
@@ -54,6 +54,10 @@ public class DeckCardCommandService {
         DeckCard deckCard = getDeckCardByDeckIdAndCardId(customDeck.getId(), cardId);
 
         deckCardRepository.delete(deckCard);
+    }
+
+    private boolean isCardAlreadyInDeck(Long deckId, Long cardId) {
+        return deckCardRepository.existsByDeckIdAndCardId(deckId, cardId);
     }
 
     private Deck getDefaultDeckByUserId(Long userId) {
