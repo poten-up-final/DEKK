@@ -24,6 +24,7 @@ public class BlacklistRepositoryImpl implements BlacklistRepository {
     @Override
     public boolean existsByAccessToken(String accessToken) {
         String key = PREFIX + accessToken;
-        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+        return redisTemplate.hasKey(key);
+
     }
 }
