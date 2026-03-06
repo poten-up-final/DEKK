@@ -22,4 +22,6 @@ public interface DeckCardRepository {
     void deleteAllByDeckId(Long deckId);
 
     Map<Long, Long> countCardsByDeckIds(List<Long> deckIds);
+
+    long countByDeckId(Long deckId);
 }

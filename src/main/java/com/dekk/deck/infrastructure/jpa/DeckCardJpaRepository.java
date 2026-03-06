@@ -19,11 +19,13 @@ public interface DeckCardJpaRepository extends JpaRepository<DeckCard, Long> {
 
     void deleteAllByDeckId(Long deckId);
 
-        @Query("""
-            SELECT d.deckId AS deckId, COUNT(d) AS cardCount
-            FROM DeckCard d
-            WHERE d.deckId IN :deckIds
-            GROUP BY d.deckId
-           """)
+    @Query("""
+         SELECT d.deckId AS deckId, COUNT(d) AS cardCount
+         FROM DeckCard d
+         WHERE d.deckId IN :deckIds
+         GROUP BY d.deckId
+        """)
     List<DeckCardCountProjection> countCardsByDeckIds(@Param("deckIds") List<Long> deckIds);
+
+    long countByDeckId(Long deckId);
 }

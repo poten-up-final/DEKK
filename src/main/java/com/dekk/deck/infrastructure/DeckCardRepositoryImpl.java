@@ -64,4 +64,9 @@ public class DeckCardRepositoryImpl implements DeckCardRepository {
                 DeckCardCountProjection::getCardCount
             ));
     }
+
+    @Override
+    public long countByDeckId(Long deckId) {
+        return deckCardJpaRepository.countByDeckId(deckId);
+    }
 }
