@@ -50,4 +50,23 @@ public interface CustomDeckCommandApi {
         @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "수정할 보관함 이름 정보") CustomDeckUpdateRequest request,
         @Parameter(hidden = true) CustomUserDetails userDetails
     );
+
+    @Operation(summary = "커스텀 보관함 삭제", description = "커스텀 보관함을 삭제합니다. 내부의 카드 정보도 함께 삭제 처리됩니다.")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20007)"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "기본 보관함 삭제 시도(ED40007)",
+            content = @Content(schema = @Schema(implementation = com.dekk.common.error.ErrorResponse.class))
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "보관함을 찾을 수 없습니다(ED40403)",
+            content = @Content(schema = @Schema(implementation = com.dekk.common.error.ErrorResponse.class))
+        )
+    })
+    ResponseEntity<ApiResponse<Void>> deleteCustomDeck(
+        @Parameter(description = "삭제할 커스텀 보관함 ID", in = ParameterIn.PATH) Long customDeckId,
+        @Parameter(hidden = true) CustomUserDetails userDetails
+    );
 }

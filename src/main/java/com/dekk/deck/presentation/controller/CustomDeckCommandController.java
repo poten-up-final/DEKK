@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,5 +46,16 @@ public class CustomDeckCommandController implements CustomDeckCommandApi {
         customDeckCommandService.updateCustomDeckName(userDetails.getId(), customDeckId, request.toCommand());
 
         return ResponseEntity.ok(ApiResponse.from(DeckResultCode.CUSTOM_DECK_UPDATE_SUCCESS));
+    }
+
+    @Override
+    @DeleteMapping("/{customDeckId}")
+    public ResponseEntity<ApiResponse<Void>> deleteCustomDeck(
+        @PathVariable("customDeckId") Long customDeckId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        customDeckCommandService.deleteCustomDeck(userDetails.getId(), customDeckId);
+
+        return ResponseEntity.ok(ApiResponse.from(DeckResultCode.CUSTOM_DECK_DELETE_SUCCESS));
     }
 }
