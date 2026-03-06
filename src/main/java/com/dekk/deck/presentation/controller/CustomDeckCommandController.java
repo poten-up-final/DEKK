@@ -2,6 +2,7 @@ package com.dekk.deck.presentation.controller;
 
 import com.dekk.common.response.ApiResponse;
 import com.dekk.deck.application.CustomDeckCommandService;
+import com.dekk.deck.application.DeckCardCommandService;
 import com.dekk.deck.presentation.request.CustomDeckCreateRequest;
 import com.dekk.deck.presentation.request.CustomDeckUpdateRequest;
 import com.dekk.deck.presentation.response.DeckResultCode;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CustomDeckCommandController implements CustomDeckCommandApi {
 
     private final CustomDeckCommandService customDeckCommandService;
+    private final DeckCardCommandService deckCardCommandService;
 
     @Override
     @PostMapping
@@ -57,5 +59,27 @@ public class CustomDeckCommandController implements CustomDeckCommandApi {
         customDeckCommandService.deleteCustomDeck(userDetails.getId(), customDeckId);
 
         return ResponseEntity.ok(ApiResponse.from(DeckResultCode.CUSTOM_DECK_DELETE_SUCCESS));
+    }
+
+    @Override
+    @PostMapping("/{customDeckId}/cards/{cardId}")
+    public ResponseEntity<ApiResponse<Void>> saveCardToCustomDeck(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable("customDeckId") Long customDeckId,
+        @PathVariable("cardId") Long cardId
+    ) {
+        deckCardCommandService.saveToCustomDeck(userDetails.getId(), customDeckId, cardId);
+        return ResponseEntity.ok(ApiResponse.from(DeckResultCode.CUSTOM_DECK_CARD_SAVE_SUCCESS));
+    }
+
+    @Override
+    @DeleteMapping("/{customDeckId}/cards/{cardId}")
+    public ResponseEntity<ApiResponse<Void>> removeCardFromCustomDeck(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @PathVariable("customDeckId") Long customDeckId,
+        @PathVariable("cardId") Long cardId
+    ) {
+        deckCardCommandService.removeFromCustomDeck(userDetails.getId(), customDeckId, cardId);
+        return ResponseEntity.ok(ApiResponse.from(DeckResultCode.CUSTOM_DECK_CARD_DELETE_SUCCESS));
     }
 }
