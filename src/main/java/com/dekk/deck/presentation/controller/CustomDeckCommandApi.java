@@ -36,7 +36,7 @@ public interface CustomDeckCommandApi {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20006)"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "기본 보관함 수정 시도(ED40008) / 이름 길이 오류(ED40005)",
+            description = "기본 보관함 수정 시도(ED40007) / 이름 길이 오류(ED40005)",
             content = @Content(schema = @Schema(implementation = com.dekk.common.error.ErrorResponse.class))
         ),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
