@@ -6,8 +6,6 @@ import com.dekk.card.application.command.ProductCreateCommand;
 import com.dekk.card.application.command.ProductImageCreateCommand;
 import com.dekk.card.domain.model.enums.Platform;
 import com.dekk.card.domain.model.enums.ProductGender;
-import com.dekk.crawl.domain.exception.CrawlBusinessException;
-import com.dekk.crawl.domain.exception.CrawlErrorCode;
 import com.dekk.crawl.domain.parser.CrawlDataParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -67,14 +65,11 @@ public class MusinsaCrawlDataParser implements CrawlDataParser {
         Map<String, Boolean> matchedByGoodsNo = parseMatchedFlags(snap);
         List<ProductCreateCommand> products = parseProducts(snap, optionsByGoodsNo, matchedByGoodsNo);
 
-        boolean isActive = cardImage.imageUrl() != null && cardImage.isUploaded();
-
         return new CardCreateCommand(
                 cardImage,
                 products,
                 tags,
                 originId,
-                isActive,
                 Platform.MUSINSA,
                 height,
                 weight

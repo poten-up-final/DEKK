@@ -9,7 +9,6 @@ public record CardCreateCommand(
     List<ProductCreateCommand> productCreateCommands,
     String tags,
     String originId,
-    boolean isActive,
     Platform platform,
     Integer height,
     Integer weight
