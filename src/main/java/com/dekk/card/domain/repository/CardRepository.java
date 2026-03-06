@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CardRepository {
     Card save(Card card);
@@ -15,4 +16,5 @@ public interface CardRepository {
     Page<Card> findCardsWithImageByStatus(CardStatus status, Pageable pageable);
     Page<Card> findCardsWithProductsByStatus(CardStatus status, Pageable pageable);
     List<Card> findAllByIdInWithProducts(List<Long> ids);
+    Optional<Card> findById(Long id);
 }

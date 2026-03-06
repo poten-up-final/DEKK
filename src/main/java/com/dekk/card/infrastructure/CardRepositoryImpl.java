@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -45,5 +46,10 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public List<Card> findAllByIdInWithProducts(List<Long> ids) {
         return cardJpaRepository.findAllByIdInWithProducts(ids);
+    }
+
+    @Override
+    public Optional<Card> findById(Long id) {
+        return cardJpaRepository.findById(id);
     }
 }
