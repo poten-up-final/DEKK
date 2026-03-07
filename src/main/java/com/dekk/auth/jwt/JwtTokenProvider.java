@@ -28,8 +28,11 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
 
     private static final String AUTHORITIES_KEY = "auth";
-    private final Key key;
+    private static final String TOKEN_TYPE_KEY = "type";
+    private static final String ACCESS_TOKEN_TYPE = "ACCESS";
+    private static final String REFRESH_TOKEN_TYPE = "REFRESH";
 
+    private final Key key;
     private final long accessTokenValidityTime;
     private final long refreshTokenValidityTime;
 
@@ -45,14 +48,14 @@ public class JwtTokenProvider {
     }
 
     public String createAccessToken(Authentication authentication) {
-        return createToken(authentication, accessTokenValidityTime);
+        return createToken(authentication, accessTokenValidityTime, ACCESS_TOKEN_TYPE);
     }
 
     public String createRefreshToken(Authentication authentication) {
-        return createToken(authentication, refreshTokenValidityTime);
+        return createToken(authentication, refreshTokenValidityTime, REFRESH_TOKEN_TYPE);
     }
 
-    private String createToken(Authentication authentication, long tokenValidTime) {
+    private String createToken(Authentication authentication, long tokenValidTime, String tokenType) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -70,17 +73,24 @@ public class JwtTokenProvider {
                 .claim(AUTHORITIES_KEY, authorities)
                 .claim("userId", userId)
                 .claim("status", status)
+                .claim(TOKEN_TYPE_KEY, tokenType)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .setExpiration(validity)
                 .compact();
     }
 
+    public boolean isAccessToken(String token) {
+        String type = getClaims(token).get(TOKEN_TYPE_KEY, String.class);
+        return ACCESS_TOKEN_TYPE.equals(type);
+    }
+
+    public boolean isRefreshToken(String token) {
+        String type = getClaims(token).get(TOKEN_TYPE_KEY, String.class);
+        return REFRESH_TOKEN_TYPE.equals(type);
+    }
+
     public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        Claims claims = getClaims(token);
 
         String role = claims.get(AUTHORITIES_KEY).toString();
 
@@ -100,7 +110,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            getClaims(token);
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             throw new AuthBusinessException(AuthErrorCode.INVALID_TOKEN);
@@ -111,5 +121,24 @@ public class JwtTokenProvider {
         } catch (IllegalArgumentException e) {
             throw new AuthBusinessException(AuthErrorCode.EMPTY_CLAIMS);
         }
+    }
+
+    public long getRemainingExpirationTime(String token) {
+        try {
+            Date expiration = getClaims(token).getExpiration();
+            long now = (new Date()).getTime();
+            long remainingMillis = expiration.getTime() - now;
+            return remainingMillis > 0 ? remainingMillis / 1000 : 0;
+        } catch (ExpiredJwtException e) {
+            return 0;
+        }
+    }
+
+    private Claims getClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

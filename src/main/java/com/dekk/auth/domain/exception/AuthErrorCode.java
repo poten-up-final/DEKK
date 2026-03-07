@@ -13,6 +13,7 @@ public enum AuthErrorCode implements ErrorCode {
     EMPTY_CLAIMS(HttpStatus.UNAUTHORIZED, "EA40104", "JWT 클레임 문자열이 비어 있습니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "EA40105", "유효하지 않은 리프레시 토큰입니다."),
     BLACKLISTED_TOKEN(HttpStatus.UNAUTHORIZED, "EA40106", "로그아웃 처리되어 차단된 접근입니다."),
+    INVALID_TOKEN_TYPE(HttpStatus.UNAUTHORIZED, "EA40107", "잘못된 타입의 JWT 토큰 유형입니다."),
 
     ABNORMAL_TOKEN_ACCESS(HttpStatus.FORBIDDEN, "EA40301", "비정상적인 토큰 접근이 감지되었습니다. 모든 기기에서 로그아웃됩니다.");
 

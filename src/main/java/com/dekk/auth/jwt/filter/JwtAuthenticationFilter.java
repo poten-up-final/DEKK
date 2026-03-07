@@ -1,5 +1,7 @@
 package com.dekk.auth.jwt.filter;
 
+import com.dekk.auth.domain.exception.AuthErrorCode;
+import com.dekk.auth.domain.repository.BlacklistRepository;
 import com.dekk.auth.jwt.JwtTokenProvider;
 import com.dekk.auth.domain.exception.AuthBusinessException;
 import com.dekk.common.error.ErrorResponse;
@@ -26,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final BlacklistRepository blacklistRepository;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -40,6 +43,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             if (jwtTokenProvider.validateToken(jwt)) {
+
+                if(!jwtTokenProvider.isAccessToken(jwt)) {
+                    throw new AuthBusinessException(AuthErrorCode.INVALID_TOKEN_TYPE);
+                }
+
+                if (blacklistRepository.existsByAccessToken(jwt)) {
+                    throw new AuthBusinessException(AuthErrorCode.BLACKLISTED_TOKEN);
+                }
+
                 Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
