@@ -1,5 +1,6 @@
 package com.dekk.auth.application;
 
+import com.dekk.auth.domain.exception.AuthErrorCode;
 import com.dekk.user.application.command.UserCreateCommand;
 import com.dekk.user.domain.model.User;
 import com.dekk.user.domain.model.enums.Provider;
@@ -41,9 +42,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private User saveOrUpdate(OAuth2UserInfo userInfo, Provider provider) {
         return userRepository.findByProviderAndProviderId(provider, userInfo.getProviderId())
-                .orElseGet(() -> userRepository.save(
-                        User.create(new UserCreateCommand(userInfo.getEmail(), provider, userInfo.getProviderId()))
-                ));
+                .orElseGet(() -> {
+                    userRepository.findByEmail(userInfo.getEmail())
+                            .ifPresent(existingUser -> {
+                                throw new OAuth2AuthenticationException(AuthErrorCode.DUPLICATE_EMAIL.code() + ":" + existingUser.getProvider().name());
+                            });
 
+                    return userRepository.save(
+                            User.create(new UserCreateCommand(userInfo.getEmail(), provider, userInfo.getProviderId()))
+                    );
+                });
     }
 }

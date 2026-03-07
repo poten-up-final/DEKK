@@ -27,10 +27,17 @@ public class OAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler 
                                         AuthenticationException exception) throws IOException, ServletException {
         log.error("OAuth2 authentication failed: {}", exception.getMessage());
 
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
-                .queryParam("error", exception.getLocalizedMessage())
-                .build().toUriString();
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(redirectUri);
 
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        String message = exception.getMessage();
+        if (message != null && message.startsWith("EA40901:")) {
+            String existingProvider = message.split(":")[1];
+            builder.queryParam("error", "DUPLICATE_EMAIL")
+                    .queryParam("provider", existingProvider);
+        } else {
+            builder.queryParam("error", exception.getLocalizedMessage());
+        }
+
+        getRedirectStrategy().sendRedirect(request, response, builder.build().toUriString());
     }
 }
