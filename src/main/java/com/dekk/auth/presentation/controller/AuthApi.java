@@ -3,7 +3,9 @@ package com.dekk.auth.presentation.controller;
 import com.dekk.auth.presentation.request.TokenRefreshRequest;
 import com.dekk.auth.presentation.response.TokenResponse;
 import com.dekk.common.response.ApiResponse;
+import com.dekk.security.oauth2.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -11,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "인증 API", description = "토큰 재발급 및 로그아웃 API")
 public interface AuthApi {
@@ -28,9 +31,12 @@ public interface AuthApi {
             @Valid @RequestBody TokenRefreshRequest request
     );
 
-    @Operation(summary = "로그아웃", description = "로그아웃을 처리합니다.")
+    @Operation(summary = "로그아웃", description = "로그아웃을 처리하여 Refresh Token을 삭제하고 Access Token을 무효화합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SA20002)")
     })
-    ResponseEntity<ApiResponse<Void>> logout();
+    ResponseEntity<ApiResponse<Void>> logout(
+            @Parameter(hidden = true) CustomUserDetails userDetails,
+            @Parameter(hidden = true) @RequestHeader("Authorization") String authorizationHeader
+    );
 }
