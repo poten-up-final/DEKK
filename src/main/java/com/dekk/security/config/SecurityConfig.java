@@ -4,6 +4,7 @@ import com.dekk.auth.application.CustomOAuth2UserService;
 import com.dekk.auth.jwt.filter.JwtAuthenticationFilter;
 import com.dekk.security.oauth2.handler.OAuth2FailureHandler;
 import com.dekk.security.oauth2.handler.OAuth2SuccessHandler;
+import com.dekk.security.oauth2.repository.InMemoryOAuth2AuthorizationRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,8 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    private final InMemoryOAuth2AuthorizationRequestRepository inMemoryOAuth2AuthorizationRequestRepository;
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
@@ -62,6 +65,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorization -> authorization
+                                .authorizationRequestRepository(inMemoryOAuth2AuthorizationRequestRepository))
                         .loginPage(loginPageUrl)
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
