@@ -4,7 +4,7 @@ import com.dekk.app.card.recommend.application.RecommendQueryService;
 import com.dekk.app.card.recommend.presentation.dto.response.RecommendCardResponse;
 import com.dekk.app.card.recommend.presentation.response.RecommendResultCode;
 import com.dekk.global.response.ApiResponse;
-import com.dekk.global.response.PageResponse;
+import com.dekk.global.response.SliceResponse;
 import com.dekk.global.security.oauth2.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +25,7 @@ public class RecommendQueryController implements RecommendQueryApi {
 
     @Override
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<RecommendCardResponse>>> getRecommendCards(
+    public ResponseEntity<ApiResponse<SliceResponse<RecommendCardResponse>>> getRecommendCards(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -33,7 +33,7 @@ public class RecommendQueryController implements RecommendQueryApi {
 
         return ResponseEntity.ok(ApiResponse.of(
                 RecommendResultCode.RECOMMEND_CARD_SUCCESS,
-                PageResponse.from(recommendQueryService
+                SliceResponse.from(recommendQueryService
                         .getRecommendCards(userDetails.getId(), pageable)
                         .map(RecommendCardResponse::from))));
     }
