@@ -1,8 +1,8 @@
 package com.dekk.app.deck.presentation.controller;
 
 import com.dekk.app.deck.application.DefaultDeckQueryService;
-import com.dekk.app.deck.application.dto.result.MyDeckCardResult;
 import com.dekk.app.deck.presentation.response.DeckResultCode;
+import com.dekk.app.deck.presentation.response.MyDeckCardResponse;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.response.PageResponse;
 import com.dekk.global.security.oauth2.CustomUserDetails;
@@ -27,11 +27,15 @@ public class DefaultDeckQueryController implements DefaultDeckQueryApi {
 
     @Override
     @GetMapping("/cards")
-    public ResponseEntity<ApiResponse<PageResponse<MyDeckCardResult>>> getMyDefaultDeckCards(
+    public ResponseEntity<ApiResponse<PageResponse<MyDeckCardResponse>>> getMyDefaultDeckCards(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @ParameterObject @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<MyDeckCardResult> pageResult = deckQueryService.getMyDefaultDeckCards(userDetails.getId(), pageable);
 
-        return ResponseEntity.ok(ApiResponse.of(DeckResultCode.DECK_CARD_LIST_SUCCESS, PageResponse.from(pageResult)));
+        Page<MyDeckCardResponse> responsePage = deckQueryService
+                .getMyDefaultDeckCards(userDetails.getId(), pageable)
+                .map(MyDeckCardResponse::from);
+
+        return ResponseEntity.ok(
+                ApiResponse.of(DeckResultCode.DECK_CARD_LIST_SUCCESS, PageResponse.from(responsePage)));
     }
 }

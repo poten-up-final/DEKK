@@ -1,7 +1,7 @@
 package com.dekk.app.deck.presentation.controller;
 
-import com.dekk.app.deck.application.dto.result.MyDeckCardResult;
 import com.dekk.app.deck.domain.exception.DeckErrorCode;
+import com.dekk.app.deck.presentation.response.MyDeckCardResponse;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.response.PageResponse;
 import com.dekk.global.security.oauth2.CustomUserDetails;
@@ -19,6 +19,6 @@ public interface DefaultDeckQueryApi {
     @Operation(summary = "기본덱 카드 목록 페이징 조회", description = "기본덱의 카드 목록을 페이징하여 조회합니다. (기본 정렬: 최신순)")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SDK20002)")
     @ApiErrorExceptions({DeckErrorCode.class})
-    ResponseEntity<ApiResponse<PageResponse<MyDeckCardResult>>> getMyDefaultDeckCards(
+    ResponseEntity<ApiResponse<PageResponse<MyDeckCardResponse>>> getMyDefaultDeckCards(
             @Parameter(hidden = true) CustomUserDetails userDetails, @ParameterObject Pageable pageable);
 }

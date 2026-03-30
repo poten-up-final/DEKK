@@ -1,7 +1,7 @@
 package com.dekk.app.deck.presentation.controller;
 
 import com.dekk.app.deck.application.DeckQueryService;
-import com.dekk.app.deck.application.dto.result.DeckResult;
+import com.dekk.app.deck.presentation.response.DeckResponse;
 import com.dekk.app.deck.presentation.response.DeckResultCode;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.security.oauth2.CustomUserDetails;
@@ -22,10 +22,13 @@ public class DeckQueryController implements DeckQueryApi {
 
     @Override
     @GetMapping
-    public ResponseEntity<ApiResponse<List<DeckResult>>> getDecks(
+    public ResponseEntity<ApiResponse<List<DeckResponse>>> getDecks(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<DeckResult> result = deckQueryService.getDecks(userDetails.getId());
 
-        return ResponseEntity.ok(ApiResponse.of(DeckResultCode.DECK_LIST_SUCCESS, result));
+        List<DeckResponse> response = deckQueryService.getDecks(userDetails.getId()).stream()
+                .map(DeckResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.of(DeckResultCode.DECK_LIST_SUCCESS, response));
     }
 }

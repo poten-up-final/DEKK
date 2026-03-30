@@ -1,7 +1,6 @@
 package com.dekk.app.deck.presentation.response;
 
 import com.dekk.app.deck.application.dto.result.CustomDeckCardsResult;
-import com.dekk.app.deck.application.dto.result.MyDeckCardResult;
 import com.dekk.app.deck.domain.model.enums.DeckRole;
 import com.dekk.app.deck.domain.model.enums.DeckType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,9 +20,14 @@ public record CustomDeckCardsResponse(
         @Schema(description = "토큰 만료 남은 시간(초)", example = "86400")
         Long expiredInSeconds,
 
-        @Schema(description = "카드 목록") List<MyDeckCardResult> cards) {
+        @Schema(description = "카드 목록") List<MyDeckCardResponse> cards) {
+
     public static CustomDeckCardsResponse from(CustomDeckCardsResult result) {
         return new CustomDeckCardsResponse(
-                result.deckType(), result.role(), result.token(), result.expiredInSeconds(), result.cards());
+                result.deckType(),
+                result.role(),
+                result.token(),
+                result.expiredInSeconds(),
+                result.cards().stream().map(MyDeckCardResponse::from).toList());
     }
 }

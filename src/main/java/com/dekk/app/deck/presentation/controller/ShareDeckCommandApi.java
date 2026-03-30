@@ -1,8 +1,8 @@
 package com.dekk.app.deck.presentation.controller;
 
-import com.dekk.app.deck.application.dto.result.ShareTokenResult;
 import com.dekk.app.deck.domain.exception.DeckErrorCode;
 import com.dekk.app.deck.presentation.request.SharedDeckJoinRequest;
+import com.dekk.app.deck.presentation.response.ShareTokenResponse;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.security.oauth2.CustomUserDetails;
 import com.dekk.global.swagger.ApiErrorExceptions;
@@ -22,7 +22,7 @@ public interface ShareDeckCommandApi {
                     "보관함 상태를 SHARED로 변경하고 24시간 유효한 초대 토큰을 발급합니다. 이미 켜져 있고 남은 시간이 10분 초과일 경우 기존 토큰을 반환(멱등성)하며, 10분 이하일 경우 새 토큰을 발급하고 구 토큰은 10분 뒤 자연 소멸되도록 오버랩합니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20013)")
     @ApiErrorExceptions({DeckErrorCode.class})
-    ResponseEntity<ApiResponse<ShareTokenResult>> turnOnShare(
+    ResponseEntity<ApiResponse<ShareTokenResponse>> turnOnShare(
             @Parameter(hidden = true) CustomUserDetails userDetails,
             @Parameter(description = "공유를 켤 커스텀덱 ID", in = ParameterIn.PATH) Long customDeckId);
 

@@ -4,6 +4,7 @@ import com.dekk.app.deck.application.ShareDeckCommandService;
 import com.dekk.app.deck.application.dto.result.ShareTokenResult;
 import com.dekk.app.deck.presentation.request.SharedDeckJoinRequest;
 import com.dekk.app.deck.presentation.response.DeckResultCode;
+import com.dekk.app.deck.presentation.response.ShareTokenResponse;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.security.oauth2.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -26,10 +27,12 @@ public class ShareDeckCommandController implements ShareDeckCommandApi {
 
     @Override
     @PostMapping("/custom/{customDeckId}/share")
-    public ResponseEntity<ApiResponse<ShareTokenResult>> turnOnShare(
+    public ResponseEntity<ApiResponse<ShareTokenResponse>> turnOnShare(
             @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("customDeckId") Long customDeckId) {
+
         ShareTokenResult result = shareDeckCommandService.turnOnShareAndGetToken(userDetails.getId(), customDeckId);
-        return ResponseEntity.ok(ApiResponse.of(DeckResultCode.SHARE_DECK_ON_SUCCESS, result));
+
+        return ResponseEntity.ok(ApiResponse.of(DeckResultCode.SHARE_DECK_ON_SUCCESS, ShareTokenResponse.from(result)));
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.dekk.app.deck.presentation.controller;
 
-import com.dekk.app.deck.application.dto.result.CustomDeckResult;
 import com.dekk.app.deck.domain.exception.DeckErrorCode;
 import com.dekk.app.deck.presentation.response.CustomDeckCardsResponse;
+import com.dekk.app.deck.presentation.response.CustomDeckResponse;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.security.oauth2.CustomUserDetails;
 import com.dekk.global.swagger.ApiErrorExceptions;
@@ -19,7 +19,7 @@ public interface CustomDeckQueryApi {
     @Operation(summary = "내 커스텀덱(쉐어덱) 목록 조회", description = "사용자가 생성한 커스텀덱 목록과 최신 카드 썸네일(imageUrl) 1장을 최신순으로 조회합니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20008)")
     @ApiErrorExceptions({DeckErrorCode.class})
-    ResponseEntity<ApiResponse<List<CustomDeckResult>>> getMyCustomDecks(
+    ResponseEntity<ApiResponse<List<CustomDeckResponse>>> getMyCustomDecks(
             @Parameter(hidden = true) CustomUserDetails userDetails);
 
     @Operation(
