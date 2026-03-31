@@ -9,6 +9,7 @@ import com.dekk.global.security.oauth2.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,10 +32,11 @@ public class RecommendQueryController implements RecommendQueryApi {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return ResponseEntity.ok(ApiResponse.of(
-                RecommendResultCode.RECOMMEND_CARD_SUCCESS,
-                SliceResponse.from(recommendQueryService
-                        .getRecommendCards(userDetails.getId(), pageable)
-                        .map(RecommendCardResponse::from))));
+        Slice<RecommendCardResponse> result = recommendQueryService
+                .getRecommendCards(userDetails.getId(), pageable)
+                .map(RecommendCardResponse::from);
+
+        return ResponseEntity.ok(
+                ApiResponse.of(RecommendResultCode.RECOMMEND_CARD_SUCCESS, SliceResponse.from(result)));
     }
 }

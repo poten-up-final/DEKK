@@ -15,18 +15,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class RecommendQueryService {
 
     private static final double RECOMMEND_RATIO = 0.7;
+    private static final int DEEP_SCROLL_PAGE_THRESHOLD = 10;
+    private static final int LARGE_CANDIDATE_THRESHOLD = 500;
 
     private final CardQueryService cardQueryService;
     private final UserQueryService userQueryService;
@@ -38,13 +42,39 @@ public class RecommendQueryService {
         int totalNeeded = (int) (pageable.getOffset() + pageable.getPageSize());
         int recommendCount = (int) Math.ceil(totalNeeded * RECOMMEND_RATIO);
 
-        Set<Long> swipedIds = activeLogQueryService.getAllSwipedCardIds(userId);
-        List<MemberCardResult> recommendCards =
-                rankCandidates(userId, swipedIds).stream().limit(recommendCount).toList();
+        if (pageable.getPageNumber() >= DEEP_SCROLL_PAGE_THRESHOLD) {
+            log.warn("[Recommend] 깊은 스크롤 감지 userId={} page={} - 컨텐츠 다양성 부족 가능성", userId, pageable.getPageNumber());
+        }
 
+        Set<Long> swipedIds = activeLogQueryService.getAllSwipedCardIds(userId);
+        log.debug(
+                "[Recommend] userId={} swipedCount={} totalNeeded={} recommendTarget={}",
+                userId,
+                swipedIds.size(),
+                totalNeeded,
+                recommendCount);
+
+        List<MemberCardResult> rankedCandidates = rankCandidates(userId, swipedIds);
+
+        if (rankedCandidates.size() < recommendCount) {
+            log.warn(
+                    "[Recommend] 후보군 부족 userId={} candidateCount={} recommendTarget={}",
+                    userId,
+                    rankedCandidates.size(),
+                    recommendCount);
+        }
+
+        List<MemberCardResult> recommendCards =
+                rankedCandidates.stream().limit(recommendCount).toList();
         Set<Long> recommendIds = extractCardIds(recommendCards);
         int normalCount = totalNeeded - recommendCards.size();
         List<MemberCardResult> normalCards = fetchNormalCards(swipedIds, recommendIds, normalCount);
+
+        log.debug(
+                "[Recommend] userId={} served: recommend={} normal={}",
+                userId,
+                recommendCards.size(),
+                normalCards.size());
 
         List<RecommendCardResult> allResults = mergeRecommendResults(recommendCards, normalCards);
         return toSlice(allResults, pageable, totalNeeded);
@@ -87,9 +117,24 @@ public class RecommendQueryService {
         List<MemberCardResult> candidates = fetchCandidates(userInfo).stream()
                 .filter(card -> !swipedIds.contains(card.cardId()))
                 .toList();
+
+        if (candidates.size() >= LARGE_CANDIDATE_THRESHOLD) {
+            log.warn("[Recommend] 대용량 후보군 스코어링 userId={} candidateCount={} - 인메모리 부하 위험", userId, candidates.size());
+        }
         Map<Long, Double> preferences = buildCategoryPreferences(userId);
+
+        if (preferences.isEmpty()) {
+            log.info("[Recommend] cold-start userId={} (카테고리 선호 없음, 체형 기반으로만 추천)", userId);
+        }
+        log.debug(
+                "[Recommend] scoring userId={} candidateCount={} preferenceCategories={}",
+                userId,
+                candidates.size(),
+                preferences.size());
+
         Map<Long, List<Long>> cardCategoryMap = cardCategoryQueryService.getCardCategoryMap(
                 candidates.stream().map(MemberCardResult::cardId).toList());
+
         return recommendScoringService.rank(
                 userInfo.height(), userInfo.weight(), candidates, cardCategoryMap, preferences);
     }
