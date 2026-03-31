@@ -19,7 +19,7 @@ public class RecommendScoringService {
     private static final double CATEGORY_WEIGHT = 0.6;
     private static final double BODY_WEIGHT = 0.4;
 
-    public double calculateBodyScore(int userHeight, int userWeight, Integer cardHeight, Integer cardWeight) {
+    private double calculateBodyScore(int userHeight, int userWeight, Integer cardHeight, Integer cardWeight) {
         double heightScore = calculateDimensionScore(userHeight, cardHeight, HEIGHT_RANGE);
         double weightScore = calculateDimensionScore(userWeight, cardWeight, WEIGHT_RANGE);
         return (heightScore + weightScore) / SCORE_DIMENSION_COUNT;

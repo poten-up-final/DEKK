@@ -2,7 +2,7 @@ package com.dekk.app.card.recommend.presentation.controller;
 
 import com.dekk.app.card.recommend.presentation.dto.response.RecommendCardResponse;
 import com.dekk.global.response.ApiResponse;
-import com.dekk.global.response.PageResponse;
+import com.dekk.global.response.SliceResponse;
 import com.dekk.global.security.oauth2.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,8 +26,9 @@ public interface RecommendQueryApi {
                         description = "추천 카드 조회 성공",
                         content = @Content(schema = @Schema(implementation = RecommendCardResponse.class)))
             })
-    ResponseEntity<ApiResponse<PageResponse<RecommendCardResponse>>> getRecommendCards(
+    ResponseEntity<ApiResponse<SliceResponse<RecommendCardResponse>>> getRecommendCards(
             @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Parameter(description = "반환할 총 카드 수 (최대 50)", example = "10") @RequestParam(defaultValue = "10") @Max(50)
+            @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 당 카드 수 (최대 50)", example = "10") @RequestParam(defaultValue = "10") @Max(50)
                     int size);
 }

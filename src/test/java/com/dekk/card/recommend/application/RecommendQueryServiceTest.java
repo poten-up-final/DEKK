@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendQueryServiceTest {
@@ -75,7 +76,8 @@ class RecommendQueryServiceTest {
             given(activeLogQueryService.getAllSwipedCardIds(USER_ID))
                     .willReturn(Set.of(10L, 20L));
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, SIZE);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             List<RecommendCardResult> recommended = recommendedOnly(result);
             assertThat(recommended).hasSize(1);
@@ -93,7 +95,8 @@ class RecommendQueryServiceTest {
             given(activeLogQueryService.getAllSwipedCardIds(USER_ID))
                     .willReturn(Set.of());
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, SIZE);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(2);
         }
@@ -109,7 +112,8 @@ class RecommendQueryServiceTest {
             given(activeLogQueryService.getAllSwipedCardIds(USER_ID))
                     .willReturn(Set.of(1L, 2L));
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, SIZE);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(recommendedOnly(result)).isEmpty();
         }
@@ -138,7 +142,8 @@ class RecommendQueryServiceTest {
             given(cardQueryService.getLatestCards(any(), anyInt()))
                     .willReturn(memberCards(100L, 101L, 102L));
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, 10);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(7);
             assertThat(normalOnly(result)).hasSize(3);
@@ -156,7 +161,8 @@ class RecommendQueryServiceTest {
             given(cardQueryService.getLatestCards(any(), anyInt()))
                     .willReturn(memberCards(100L, 101L, 102L, 103L, 104L, 105L, 106L));
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, 10);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(3);
             assertThat(normalOnly(result)).hasSize(7);
@@ -172,7 +178,8 @@ class RecommendQueryServiceTest {
             given(cardQueryService.getLatestCards(any(), anyInt()))
                     .willReturn(memberCards(100L));
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, 10);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             assertThat(result).anyMatch(RecommendCardResult::recommended);
             assertThat(result).anyMatch(r -> !r.recommended());
@@ -189,7 +196,8 @@ class RecommendQueryServiceTest {
             given(cardQueryService.getLatestCards(any(), anyInt()))
                     .willReturn(memberCards(100L, 101L));
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, 10);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             Set<Long> recommendedIds = recommendedOnly(result).stream()
                     .map(r -> r.card().cardId())
@@ -223,7 +231,8 @@ class RecommendQueryServiceTest {
         void shouldQueryAllGenders_whenGenderIsNull() {
             given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(null, 170, 65));
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, SIZE);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(result).isEmpty();
         }
@@ -235,7 +244,8 @@ class RecommendQueryServiceTest {
             List<Card> candidates = mockCards(1L);
             given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, SIZE);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(1);
         }
@@ -262,7 +272,8 @@ class RecommendQueryServiceTest {
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
                     .willAnswer(inv -> inv.getArgument(2));
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, SIZE);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(result).isEmpty();
         }
@@ -277,7 +288,8 @@ class RecommendQueryServiceTest {
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
                     .willAnswer(inv -> inv.getArgument(2));
 
-            List<RecommendCardResult> result = recommendQueryService.getRecommendCards(USER_ID, SIZE);
+            List<RecommendCardResult> result =
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(result).isEmpty();
         }

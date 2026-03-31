@@ -14,8 +14,4 @@ public record PageResponse<T>(
                 page.getTotalPages(),
                 page.hasNext());
     }
-
-    public static <T> PageResponse<T> from(List<T> list, int pageSize) {
-        return new PageResponse<>(list, 0, pageSize, list.size(), list.isEmpty() ? 0 : 1, false);
-    }
 }
