@@ -1,7 +1,5 @@
 package com.dekk.app.user.application;
 
-import com.dekk.app.deck.application.DeckWithdrawalCommandService;
-import com.dekk.app.deck.application.DefaultDeckCommandService;
 import com.dekk.app.user.application.command.UserOnboardingCommand;
 import com.dekk.app.user.application.command.UserProfileUpdateCommand;
 import com.dekk.app.user.domain.exception.UserBusinessException;
@@ -9,7 +7,10 @@ import com.dekk.app.user.domain.exception.UserErrorCode;
 import com.dekk.app.user.domain.model.User;
 import com.dekk.app.user.domain.repository.ProfileRepository;
 import com.dekk.app.user.domain.repository.UserRepository;
+import com.dekk.global.event.UserDeletedEvent;
+import com.dekk.global.event.UserOnboardedEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,35 +21,29 @@ public class UserCommandService {
 
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
-    private final DefaultDeckCommandService deckCommandService;
-    private final DeckWithdrawalCommandService deckWithdrawalCommandService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void onboardUser(Long userId, UserOnboardingCommand command) {
         User user = getUser(userId);
-
         validateDuplicateNickname(command.nickname());
 
         user.completeOnboarding(command);
-        userRepository.save(user);
 
-        deckCommandService.createDefaultDeck(user.getId());
+        eventPublisher.publishEvent(UserOnboardedEvent.of(user.getId()));
     }
 
     public void updateProfileInfo(Long userId, UserProfileUpdateCommand command) {
         User user = getUserWithProfile(userId);
-
         if (isNicknameChanged(user, command.nickname())) {
             validateDuplicateNickname(command.nickname());
         }
-
         user.updateProfileInfo(command);
     }
 
     public void deleteUser(Long userId) {
-        deckWithdrawalCommandService.processWithdrawal(userId);
+        eventPublisher.publishEvent(UserDeletedEvent.of(userId));
 
         User user = getUser(userId);
-
         user.deleteUser();
     }
 
