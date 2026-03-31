@@ -1,6 +1,5 @@
 package com.dekk.global.security.oauth2.handler;
 
-import com.dekk.app.auth.domain.exception.AuthErrorCode;
 import com.dekk.global.error.GlobalErrorCode;
 import com.dekk.global.security.oauth2.dto.ErrorQueryParam;
 import com.dekk.global.security.oauth2.exception.CustomOAuth2Exception;
@@ -13,19 +12,12 @@ import org.springframework.stereotype.Component;
 public class OAuth2ErrorMapper {
 
     public ErrorQueryParam mapError(AuthenticationException exception) {
-
         if (exception instanceof CustomOAuth2Exception customException) {
             return ErrorQueryParam.of(customException.getErrorCode().code(), null);
         }
 
         if (exception instanceof OAuth2AuthenticationException oAuthException) {
             OAuth2Error error = oAuthException.getError();
-
-            if (AuthErrorCode.DUPLICATE_EMAIL.code().equals(error.getErrorCode())) {
-                String provider = error.getDescription() != null ? error.getDescription() : "unknown";
-                return ErrorQueryParam.of(error.getErrorCode(), provider);
-            }
-
             return ErrorQueryParam.of(error.getErrorCode(), null);
         }
 
