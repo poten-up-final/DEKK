@@ -12,7 +12,9 @@ import com.dekk.app.user.application.dto.result.UserInfoResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,10 @@ public class RecommendQueryService {
     private final RecommendScoringService recommendScoringService;
 
     public Slice<RecommendCardResult> getRecommendCards(Long userId, Pageable pageable) {
+        return getRecommendCards(userId, pageable, null);
+    }
+
+    public Slice<RecommendCardResult> getRecommendCards(Long userId, Pageable pageable, UUID startCardId) {
         int totalNeeded = (int) (pageable.getOffset() + pageable.getPageSize());
         int recommendCount = (int) Math.ceil(totalNeeded * RECOMMEND_RATIO);
 
@@ -77,7 +83,26 @@ public class RecommendQueryService {
                 normalCards.size());
 
         List<RecommendCardResult> allResults = mergeRecommendResults(recommendCards, normalCards);
+
+        if (startCardId != null && pageable.getPageNumber() == 0) {
+            allResults = prependStartCard(startCardId, allResults);
+        }
+
         return toSlice(allResults, pageable, totalNeeded);
+    }
+
+    private List<RecommendCardResult> prependStartCard(UUID startCardId, List<RecommendCardResult> results) {
+        Optional<MemberCardResult> startCard = cardQueryService.findByPublicId(startCardId);
+        if (startCard.isEmpty()) {
+            return results;
+        }
+        MemberCardResult card = startCard.get();
+        List<RecommendCardResult> merged = new ArrayList<>(results.size() + 1);
+        merged.add(RecommendCardResult.recommended(card));
+        results.stream()
+                .filter(r -> !r.card().publicId().equals(startCardId))
+                .forEach(merged::add);
+        return merged;
     }
 
     private Set<Long> extractCardIds(List<MemberCardResult> cards) {
