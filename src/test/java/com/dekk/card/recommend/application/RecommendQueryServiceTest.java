@@ -23,6 +23,7 @@ import com.dekk.app.user.domain.model.enums.Gender;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -311,6 +312,7 @@ class RecommendQueryServiceTest {
         Card card = mock(Card.class);
         CardImage cardImage = mock(CardImage.class);
         given(card.getId()).willReturn(cardId);
+        given(card.getPublicId()).willReturn(UUID.randomUUID());
         given(card.getCardImage()).willReturn(cardImage);
         given(cardImage.getImageUrl()).willReturn("http://image.url/" + cardId);
         given(card.getHeight()).willReturn(170);
@@ -326,7 +328,7 @@ class RecommendQueryServiceTest {
 
     private List<MemberCardResult> memberCards(Long... ids) {
         return java.util.Arrays.stream(ids)
-                .map(id -> new MemberCardResult(id, null, null, null, List.of(), List.of()))
+                .map(id -> new MemberCardResult(id, null, null, null, null, List.of(), List.of()))
                 .toList();
     }
 }
