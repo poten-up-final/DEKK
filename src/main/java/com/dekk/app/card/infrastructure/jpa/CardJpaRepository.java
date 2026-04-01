@@ -6,6 +6,7 @@ import com.dekk.app.card.domain.model.enums.Platform;
 import com.dekk.app.card.domain.model.enums.TargetGender;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,6 +41,14 @@ public interface CardJpaRepository extends JpaRepository<Card, Long>, JpaSpecifi
             + "LEFT JOIN FETCH p.productImage "
             + "WHERE c.id = :id")
     Optional<Card> findByIdWithDetails(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT c FROM Card c "
+            + "JOIN FETCH c.cardImage "
+            + "LEFT JOIN FETCH c.cardProducts cp "
+            + "LEFT JOIN FETCH cp.product p "
+            + "LEFT JOIN FETCH p.productImage "
+            + "WHERE c.publicId = :publicId AND c.status = 'APPROVED'")
+    Optional<Card> findByPublicIdWithProducts(@Param("publicId") UUID publicId);
 
     // TODO: approvedAt 정렬로 변경 필요
     @Query("SELECT c.id FROM Card c WHERE c.status = 'APPROVED' AND c.id NOT IN :excludeIds ORDER BY c.updatedAt DESC")

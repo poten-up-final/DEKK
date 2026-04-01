@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -109,5 +110,10 @@ public class CardRepositoryImpl implements CardRepository {
         }
 
         return cardJpaRepository.findAllByIdInWithProductsOrderByUpdatedAt(cardIds);
+    }
+
+    @Override
+    public Optional<Card> findByPublicId(UUID publicId) {
+        return cardJpaRepository.findByPublicIdWithProducts(publicId);
     }
 }
