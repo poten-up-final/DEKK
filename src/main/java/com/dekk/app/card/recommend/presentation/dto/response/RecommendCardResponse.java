@@ -8,7 +8,8 @@ import java.util.UUID;
 
 @Schema(description = "추천 피드 카드 응답")
 public record RecommendCardResponse(
-        @Schema(description = "카드 공개 ID", example = "550e8400-e29b-41d4-a716-446655440000") UUID publicId,
+        @Schema(description = "카드 공개 ID", example = "550e8400-e29b-41d4-a716-446655440000")
+        UUID publicId,
 
         @Schema(description = "카드 이미지 URL", example = "https://example.com/card.jpg")
         String cardImageUrl,

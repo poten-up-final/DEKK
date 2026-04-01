@@ -99,9 +99,7 @@ public class RecommendQueryService {
         MemberCardResult card = startCard.get();
         List<RecommendCardResult> merged = new ArrayList<>(results.size() + 1);
         merged.add(RecommendCardResult.recommended(card));
-        results.stream()
-                .filter(r -> !r.card().publicId().equals(startCardId))
-                .forEach(merged::add);
+        results.stream().filter(r -> !r.card().publicId().equals(startCardId)).forEach(merged::add);
         return merged;
     }
 
