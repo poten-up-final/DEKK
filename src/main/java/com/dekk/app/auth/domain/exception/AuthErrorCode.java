@@ -13,9 +13,7 @@ public enum AuthErrorCode implements ErrorCode {
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "EA40105", "유효하지 않은 리프레시 토큰입니다."),
     INVALID_TOKEN_TYPE(HttpStatus.UNAUTHORIZED, "EA40107", "잘못된 타입의 JWT 토큰 유형입니다."),
 
-    ABNORMAL_TOKEN_ACCESS(HttpStatus.FORBIDDEN, "EA40301", "비정상적인 토큰 접근이 감지되었습니다. 모든 기기에서 로그아웃됩니다."),
-
-    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "EA40901", "이미 다른 소셜 계정으로 가입된 이메일입니다.");
+    ABNORMAL_TOKEN_ACCESS(HttpStatus.FORBIDDEN, "EA40301", "비정상적인 토큰 접근이 감지되었습니다. 모든 기기에서 로그아웃됩니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
