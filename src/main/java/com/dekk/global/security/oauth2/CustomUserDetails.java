@@ -1,7 +1,7 @@
 package com.dekk.global.security.oauth2;
 
-import com.dekk.app.user.domain.model.User;
 import com.dekk.app.user.domain.model.enums.UserStatus;
+import com.dekk.global.security.jwt.JwtPrincipal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -11,7 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-public class CustomUserDetails implements UserDetails, OAuth2User {
+public class CustomUserDetails implements UserDetails, OAuth2User, JwtPrincipal {
 
     @Getter
     private final Long id;
@@ -24,11 +24,11 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
     private final Map<String, Object> attributes;
 
-    public CustomUserDetails(User user, Map<String, Object> attributes) {
-        this.id = user.getId();
-        this.email = user.getEmail();
-        this.role = user.getRole().getKey();
-        this.status = user.getStatus();
+    public CustomUserDetails(Long id, String email, String role, UserStatus status, Map<String, Object> attributes) {
+        this.id = id;
+        this.email = email;
+        this.role = role;
+        this.status = status;
         this.attributes = attributes;
     }
 
@@ -38,6 +38,26 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         this.role = role;
         this.status = status;
         this.attributes = Collections.emptyMap();
+    }
+
+    @Override
+    public Long getJwtId() {
+        return this.id;
+    }
+
+    @Override
+    public String getJwtEmail() {
+        return this.email;
+    }
+
+    @Override
+    public String getJwtRole() {
+        return this.role;
+    }
+
+    @Override
+    public String getJwtStatus() {
+        return this.status != null ? this.status.name() : null;
     }
 
     @Override
@@ -65,7 +85,6 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         return email;
     }
 
-    // Todo : 추후에 관리자 로그인 및 자체 로그인이 추가 된다면 소셜 로그인 회원을 구분하여 계정 상태 관리 필요
     @Override
     public boolean isAccountNonExpired() {
         return true;

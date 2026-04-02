@@ -8,14 +8,14 @@ import com.dekk.app.admin.domain.exception.AdminErrorCode;
 import com.dekk.app.admin.domain.model.Admin;
 import com.dekk.app.admin.domain.model.AdminRole;
 import com.dekk.app.admin.domain.repository.AdminRepository;
-import com.dekk.app.admin.security.AdminJwtTokenProvider;
-import com.dekk.app.admin.security.AdminUserDetails;
+import com.dekk.global.security.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -39,7 +39,7 @@ class AdminAuthServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private AdminJwtTokenProvider adminJwtTokenProvider;
+    private JwtTokenProvider jwtTokenProvider;
 
     @Test
     @DisplayName("관리자 로그인 성공")
@@ -56,7 +56,8 @@ class AdminAuthServiceTest {
         given(admin.getId()).willReturn(1L);
         given(admin.getEmail()).willReturn(email);
         given(admin.getAdminRole()).willReturn(AdminRole.ADMIN);
-        given(adminJwtTokenProvider.createAccessToken(any(AdminUserDetails.class))).willReturn("test-token");
+
+        given(jwtTokenProvider.createAccessToken(any(Authentication.class))).willReturn("test-token");
 
         // when
         AdminLoginResult result = adminAuthService.login(command);
@@ -68,22 +69,19 @@ class AdminAuthServiceTest {
     @Test
     @DisplayName("관리자 로그인 실패 - 존재하지 않는 이메일")
     void login_fail_not_found_email() {
-        // given
         String email = "notfound@dekk.com";
         AdminLoginCommand command = new AdminLoginCommand(email, "password");
 
         given(adminRepository.findByEmail(email)).willReturn(Optional.empty());
 
-        // when & then
         assertThatThrownBy(() -> adminAuthService.login(command))
-                .isInstanceOf(AdminBusinessException.class)
-                .hasMessageContaining(AdminErrorCode.ADMIN_NOT_FOUND.getMessage());
+            .isInstanceOf(AdminBusinessException.class)
+            .hasMessageContaining(AdminErrorCode.ADMIN_NOT_FOUND.getMessage());
     }
 
     @Test
     @DisplayName("관리자 로그인 실패 - 비밀번호 불일치")
     void login_fail_invalid_password() {
-        // given
         String email = "admin@dekk.com";
         String password = "wrongpassword";
         AdminLoginCommand command = new AdminLoginCommand(email, password);
@@ -93,9 +91,8 @@ class AdminAuthServiceTest {
         given(admin.getPassword()).willReturn("encodedPassword");
         given(passwordEncoder.matches(password, "encodedPassword")).willReturn(false);
 
-        // when & then
         assertThatThrownBy(() -> adminAuthService.login(command))
-                .isInstanceOf(AdminBusinessException.class)
-                .hasMessageContaining(AdminErrorCode.INVALID_PASSWORD.getMessage());
+            .isInstanceOf(AdminBusinessException.class)
+            .hasMessageContaining(AdminErrorCode.INVALID_PASSWORD.getMessage());
     }
 }

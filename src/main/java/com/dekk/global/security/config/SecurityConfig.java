@@ -9,12 +9,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -39,7 +40,11 @@ public class SecurityConfig {
     private String loginPageUrl;
 
     @Bean
-    @Order(2)
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -54,8 +59,13 @@ public class SecurityConfig {
                                 "/i/v1/inspections/**",
                                 "/w/v1/cards",
                                 "/w/v1/auth/refresh",
-                                "/w/v1/decks/shared/*/cards")
+                                "/w/v1/decks/shared/*/cards",
+                                "/adm/v1/auth/login")
                         .permitAll()
+                        .requestMatchers("/adm/v1/admins/**")
+                        .hasRole("SUPER_ADMIN")
+                        .requestMatchers("/adm/**")
+                        .hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .anyRequest()
                         .authenticated())
                 .oauth2Login(oauth2 -> oauth2.loginPage(loginPageUrl)
@@ -70,12 +80,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
         configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
-
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-
         configuration.setExposedHeaders(List.of("Set-Cookie"));
         configuration.setAllowCredentials(true);
 

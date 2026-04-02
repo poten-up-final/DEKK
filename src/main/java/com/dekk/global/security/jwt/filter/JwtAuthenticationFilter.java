@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,18 +20,31 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-@RequiredArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String ADMIN_TOKEN_COOKIE_NAME = "admin_access_token";
+
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
+
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, ObjectMapper objectMapper) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String jwt = resolveTokenFromCookie(request);
+        String requestUri = request.getRequestURI();
+        String jwt = null;
+
+        if (requestUri.startsWith("/adm/")) {
+            jwt = resolveTokenFromCookie(request, ADMIN_TOKEN_COOKIE_NAME);
+        } else {
+            jwt = resolveTokenFromCookie(request, CookieUtil.ACCESS_TOKEN_NAME);
+        }
 
         if (!StringUtils.hasText(jwt)) {
             filterChain.doFilter(request, response);
@@ -41,11 +53,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             if (jwtTokenProvider.validateToken(jwt)) {
-
                 if (!jwtTokenProvider.isAccessToken(jwt)) {
                     throw new AuthBusinessException(AuthErrorCode.INVALID_TOKEN_TYPE);
                 }
-
                 Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
@@ -56,11 +66,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String resolveTokenFromCookie(HttpServletRequest request) {
+    private String resolveTokenFromCookie(HttpServletRequest request, String targetCookieName) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             return Arrays.stream(cookies)
-                    .filter(cookie -> CookieUtil.ACCESS_TOKEN_NAME.equals(cookie.getName()))
+                    .filter(cookie -> targetCookieName.equals(cookie.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);

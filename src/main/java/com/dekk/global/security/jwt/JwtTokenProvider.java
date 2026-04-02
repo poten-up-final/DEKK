@@ -1,11 +1,13 @@
 package com.dekk.global.security.jwt;
 
+import com.dekk.app.admin.security.AdminUserDetails;
 import com.dekk.app.auth.domain.exception.AuthBusinessException;
 import com.dekk.app.auth.domain.exception.AuthErrorCode;
 import com.dekk.app.user.domain.model.enums.UserStatus;
 import com.dekk.global.security.oauth2.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -13,10 +15,8 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -42,7 +42,6 @@ public class JwtTokenProvider {
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token-validity-in-seconds}") long accessTokenValidityInSeconds,
             @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds) {
-
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidityTime = accessTokenValidityInSeconds * 1000;
@@ -58,25 +57,24 @@ public class JwtTokenProvider {
     }
 
     private String createToken(Authentication authentication, long tokenValidTime, String tokenType) {
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
-        Long userId = userDetails.getId();
-        UserStatus status = userDetails.getStatus();
+        if (!(authentication.getPrincipal() instanceof JwtPrincipal principal)) {
+            throw new AuthBusinessException(AuthErrorCode.INVALID_TOKEN);
+        }
 
         long now = (new Date()).getTime();
         Date validity = new Date(now + tokenValidTime);
 
-        return Jwts.builder()
-                .setSubject(email)
-                .claim(AUTHORITIES_KEY, authorities)
-                .claim(CLAIM_USER_ID, userId)
-                .claim(CLAIM_STATUS, status)
-                .claim(TOKEN_TYPE_KEY, tokenType)
-                .signWith(key, SignatureAlgorithm.HS256)
+        JwtBuilder builder = Jwts.builder()
+                .setSubject(principal.getJwtEmail())
+                .claim(AUTHORITIES_KEY, principal.getJwtRole())
+                .claim(CLAIM_USER_ID, principal.getJwtId())
+                .claim(TOKEN_TYPE_KEY, tokenType);
+
+        if (principal.getJwtStatus() != null) {
+            builder.claim(CLAIM_STATUS, principal.getJwtStatus());
+        }
+
+        return builder.signWith(key, SignatureAlgorithm.HS256)
                 .setExpiration(validity)
                 .compact();
     }
@@ -93,17 +91,23 @@ public class JwtTokenProvider {
 
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-
         String role = claims.get(AUTHORITIES_KEY).toString();
 
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(role.split(",")).map(SimpleGrantedAuthority::new).toList();
+                java.util.Collections.singletonList(new SimpleGrantedAuthority(role));
 
         String email = claims.getSubject();
-        Long userId = ((Number) claims.get(CLAIM_USER_ID)).longValue();
-        String status = claims.get(CLAIM_STATUS, String.class);
+        Long id = ((Number) claims.get(CLAIM_USER_ID)).longValue();
 
-        CustomUserDetails principal = new CustomUserDetails(userId, email, role, UserStatus.valueOf(status));
+        Object principal;
+
+        if ("ROLE_ADMIN".equals(role) || "ROLE_SUPER_ADMIN".equals(role)) {
+            principal = new AdminUserDetails(id, email, role);
+        } else {
+            String statusStr = claims.get(CLAIM_STATUS, String.class);
+            UserStatus status = statusStr != null ? UserStatus.valueOf(statusStr) : UserStatus.ACTIVE;
+            principal = new CustomUserDetails(id, email, role, status);
+        }
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
@@ -112,14 +116,10 @@ public class JwtTokenProvider {
         try {
             getClaims(token);
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
+        } catch (SecurityException | MalformedJwtException | IllegalArgumentException | UnsupportedJwtException e) {
             throw new AuthBusinessException(AuthErrorCode.INVALID_TOKEN);
         } catch (ExpiredJwtException e) {
             throw new AuthBusinessException(AuthErrorCode.EXPIRED_TOKEN);
-        } catch (UnsupportedJwtException e) {
-            throw new AuthBusinessException(AuthErrorCode.UNSUPPORTED_TOKEN);
-        } catch (IllegalArgumentException e) {
-            throw new AuthBusinessException(AuthErrorCode.EMPTY_CLAIMS);
         }
     }
 
