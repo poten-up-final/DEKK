@@ -1,7 +1,7 @@
 package com.dekk.global.security.config;
 
-import com.dekk.app.auth.application.CustomOAuth2UserService;
 import com.dekk.global.security.jwt.filter.JwtAuthenticationFilter;
+import com.dekk.global.security.oauth2.CustomOAuth2UserService;
 import com.dekk.global.security.oauth2.handler.OAuth2FailureHandler;
 import com.dekk.global.security.oauth2.handler.OAuth2SuccessHandler;
 import java.util.List;
