@@ -1,0 +1,22 @@
+services:
+  dekk-api-dev:
+    build: .
+    container_name: dekk-api-dev-server
+    restart: always
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    env_file:
+      - .env
+    networks:
+      - shared-db-network
+      - shared-monitoring-network
+
+networks:
+  shared-db-network:
+    external: true
+    name: dekk-infra_db-network-dev
+
+  shared-monitoring-network:
+    external: true
+    name: dekk-infra_monitoring-network-dev
