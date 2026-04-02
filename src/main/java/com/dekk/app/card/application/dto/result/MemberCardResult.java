@@ -6,9 +6,11 @@ import com.dekk.app.card.domain.model.Product;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public record MemberCardResult(
         Long cardId,
+        UUID publicId,
         String cardImageUrl,
         Integer height,
         Integer weight,
@@ -35,6 +37,7 @@ public record MemberCardResult(
 
         return new MemberCardResult(
                 card.getId(),
+                card.getPublicId(),
                 card.getCardImage().getImageUrl(),
                 card.getHeight(),
                 card.getWeight(),

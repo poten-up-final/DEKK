@@ -79,7 +79,7 @@ class RecommendScoringServiceTest {
     class Rank {
 
         private MemberCardResult card(long cardId, Integer height, Integer weight) {
-            return new MemberCardResult(cardId, null, height, weight, List.of(), List.of());
+            return new MemberCardResult(cardId, null, null, height, weight, List.of(), List.of());
         }
 
         @Test
