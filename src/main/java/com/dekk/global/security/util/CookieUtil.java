@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CookieUtil {
+
     @Value("${app.cookie.domain}")
     private String domain;
 
@@ -17,28 +18,32 @@ public class CookieUtil {
     public static final String REFRESH_TOKEN_NAME = "refresh_token";
 
     public void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        ResponseCookie cookie = ResponseCookie.from(name, value)
+        ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from(name, value)
                 .path("/")
-                .domain(domain)
                 .httpOnly(true)
                 .secure(secure)
                 .sameSite("Lax")
-                .maxAge(maxAge)
-                .build();
+                .maxAge(maxAge);
 
-        response.addHeader("Set-Cookie", cookie.toString());
+        if (domain != null && !domain.isBlank()) {
+            cookieBuilder.domain(domain);
+        }
+
+        response.addHeader("Set-Cookie", cookieBuilder.build().toString());
     }
 
     public void deleteCookie(HttpServletResponse response, String name) {
-        ResponseCookie cookie = ResponseCookie.from(name, "")
+        ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from(name, "")
                 .path("/")
-                .domain(domain)
                 .httpOnly(true)
                 .secure(secure)
                 .sameSite("Lax")
-                .maxAge(0)
-                .build();
+                .maxAge(0);
 
-        response.addHeader("Set-Cookie", cookie.toString());
+        if (domain != null && !domain.isBlank()) {
+            cookieBuilder.domain(domain);
+        }
+
+        response.addHeader("Set-Cookie", cookieBuilder.build().toString());
     }
 }
