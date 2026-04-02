@@ -1,15 +1,14 @@
 package com.dekk.app.card.presentation.controller;
 
-import com.dekk.app.admin.security.AdminUserDetails;
 import com.dekk.app.card.application.CardCommandService;
 import com.dekk.app.card.presentation.request.AssignCategoriesRequest;
 import com.dekk.app.card.presentation.request.RequestDeleteCardRequest;
 import com.dekk.app.card.presentation.response.CardResultCode;
 import com.dekk.global.response.ApiResponse;
+import com.dekk.global.security.annotation.LoginAdmin;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -51,8 +50,8 @@ public class CardCommandController implements CardCommandApi {
     public ResponseEntity<ApiResponse<Void>> requestDeleteCard(
             @PathVariable("cardId") Long cardId,
             @Valid @RequestBody RequestDeleteCardRequest request,
-            @AuthenticationPrincipal AdminUserDetails adminUserDetails) {
-        cardCommandService.requestDeleteCard(request.toCommand(cardId, adminUserDetails.adminId()));
+            @LoginAdmin Long adminId) {
+        cardCommandService.requestDeleteCard(request.toCommand(cardId, adminId));
         return ResponseEntity.ok(ApiResponse.from(CardResultCode.CARD_DELETE_REQUEST_SUCCESS));
     }
 }

@@ -4,9 +4,9 @@ import com.dekk.app.admin.domain.exception.AdminErrorCode;
 import com.dekk.app.admin.domain.model.InspectionStatus;
 import com.dekk.app.admin.presentation.request.InspectionStatusUpdateRequest;
 import com.dekk.app.admin.presentation.response.ImageInspectionResponse;
-import com.dekk.app.admin.security.AdminUserDetails;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.response.PageResponse;
+import com.dekk.global.security.annotation.LoginAdmin;
 import com.dekk.global.swagger.ApiErrorExceptions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,5 +34,5 @@ public interface AdminInspectionApi {
     ResponseEntity<ApiResponse<Void>> updateInspectionStatus(
             @Parameter(description = "검수 ID") @PathVariable Long inspectionId,
             @Valid @RequestBody InspectionStatusUpdateRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal AdminUserDetails adminUserDetails);
+            @LoginAdmin Long adminId);
 }

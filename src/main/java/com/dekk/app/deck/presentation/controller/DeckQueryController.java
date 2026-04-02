@@ -4,11 +4,10 @@ import com.dekk.app.deck.application.DeckQueryService;
 import com.dekk.app.deck.presentation.response.DeckResponse;
 import com.dekk.app.deck.presentation.response.DeckResultCode;
 import com.dekk.global.response.ApiResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,10 +21,9 @@ public class DeckQueryController implements DeckQueryApi {
 
     @Override
     @GetMapping
-    public ResponseEntity<ApiResponse<List<DeckResponse>>> getDecks(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ApiResponse<List<DeckResponse>>> getDecks(@LoginUser Long userId) {
 
-        List<DeckResponse> response = deckQueryService.getDecks(userDetails.getId()).stream()
+        List<DeckResponse> response = deckQueryService.getDecks(userId).stream()
                 .map(DeckResponse::from)
                 .toList();
 

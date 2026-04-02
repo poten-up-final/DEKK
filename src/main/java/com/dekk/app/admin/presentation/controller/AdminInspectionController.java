@@ -6,15 +6,14 @@ import com.dekk.app.admin.domain.model.InspectionStatus;
 import com.dekk.app.admin.presentation.request.InspectionStatusUpdateRequest;
 import com.dekk.app.admin.presentation.response.AdminResultCode;
 import com.dekk.app.admin.presentation.response.ImageInspectionResponse;
-import com.dekk.app.admin.security.AdminUserDetails;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.response.PageResponse;
+import com.dekk.global.security.annotation.LoginAdmin;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,9 +43,9 @@ public class AdminInspectionController implements AdminInspectionApi {
     public ResponseEntity<ApiResponse<Void>> updateInspectionStatus(
             @PathVariable Long inspectionId,
             @Valid @RequestBody InspectionStatusUpdateRequest request,
-            @AuthenticationPrincipal AdminUserDetails adminUserDetails) {
+            @LoginAdmin Long adminId) {
 
-        commandService.updateInspectionStatus(request.toCommand(inspectionId, adminUserDetails.adminId()));
+        commandService.updateInspectionStatus(request.toCommand(inspectionId, adminId));
 
         return ResponseEntity.ok(ApiResponse.from(AdminResultCode.INSPECTION_STATUS_UPDATED));
     }

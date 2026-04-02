@@ -4,10 +4,9 @@ import com.dekk.app.deck.application.DeckCardCommandService;
 import com.dekk.app.deck.application.DefaultDeckCommandService;
 import com.dekk.app.deck.presentation.response.DeckResultCode;
 import com.dekk.global.response.ApiResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +23,8 @@ public class DefaultDeckCommandController implements DefaultDeckCommandApi {
     @Override
     @DeleteMapping("/cards/{cardId}")
     public ResponseEntity<ApiResponse<Void>> removeCardFromDefaultDeck(
-            @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable("cardId") Long cardId) {
-        deckCardCommandService.removeFromDefaultDeck(userDetails.getId(), cardId);
+            @LoginUser Long userId, @PathVariable("cardId") Long cardId) {
+        deckCardCommandService.removeFromDefaultDeck(userId, cardId);
         return ResponseEntity.ok(ApiResponse.from(DeckResultCode.DECK_CARD_DELETED_SUCCESS));
     }
 }

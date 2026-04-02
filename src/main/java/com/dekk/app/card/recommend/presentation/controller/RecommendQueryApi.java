@@ -3,7 +3,7 @@ package com.dekk.app.card.recommend.presentation.controller;
 import com.dekk.app.card.recommend.presentation.dto.response.RecommendCardResponse;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.response.SliceResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "추천 카드 조회 API", description = "사용자 맞춤형 추천 카드 조회 API")
@@ -28,7 +27,7 @@ public interface RecommendQueryApi {
                         content = @Content(schema = @Schema(implementation = RecommendCardResponse.class)))
             })
     ResponseEntity<ApiResponse<SliceResponse<RecommendCardResponse>>> getRecommendCards(
-            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails userDetails,
+            @LoginUser Long userId,
             @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 당 카드 수 (최대 50)", example = "10") @RequestParam(defaultValue = "10") @Max(50)
                     int size,
