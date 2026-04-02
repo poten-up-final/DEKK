@@ -56,8 +56,8 @@ public class CustomUserDetails implements UserDetails, OAuth2User, JwtPrincipal 
     }
 
     @Override
-    public UserStatus getJwtStatus() {
-        return this.status;
+    public String getJwtStatus() {
+        return this.status != null ? this.status.name() : null;
     }
 
     @Override

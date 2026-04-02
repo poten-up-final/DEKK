@@ -15,7 +15,6 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,7 +71,7 @@ public class JwtTokenProvider {
                 .claim(TOKEN_TYPE_KEY, tokenType);
 
         if (principal.getJwtStatus() != null) {
-            builder.claim(CLAIM_STATUS, principal.getJwtStatus().name());
+            builder.claim(CLAIM_STATUS, principal.getJwtStatus());
         }
 
         return builder.signWith(key, SignatureAlgorithm.HS256)
@@ -93,15 +92,17 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
         String role = claims.get(AUTHORITIES_KEY).toString();
+
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(role.split(",")).map(SimpleGrantedAuthority::new).toList();
+                java.util.Collections.singletonList(new SimpleGrantedAuthority(role));
 
         String email = claims.getSubject();
         Long id = ((Number) claims.get(CLAIM_USER_ID)).longValue();
 
         Object principal;
-        if (role.contains("ROLE_ADMIN") || role.contains("ROLE_SUPER_ADMIN")) {
-            principal = new AdminUserDetails(id, email, role.replace("ROLE_", ""));
+
+        if ("ROLE_ADMIN".equals(role) || "ROLE_SUPER_ADMIN".equals(role)) {
+            principal = new AdminUserDetails(id, email, role);
         } else {
             String statusStr = claims.get(CLAIM_STATUS, String.class);
             UserStatus status = statusStr != null ? UserStatus.valueOf(statusStr) : UserStatus.ACTIVE;
