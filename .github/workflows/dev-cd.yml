@@ -41,6 +41,7 @@ jobs:
           echo "DEV_JWT_SECRET_KEY=${{ secrets.DEV_JWT_SECRET_KEY }}" >> .env
           echo "DEV_ALLOWED_ORIGINS=${{ secrets.DEV_ALLOWED_ORIGINS }}" >> .env
           echo "DEV_COOKIE_DOMAIN=${{ secrets.DEV_COOKIE_DOMAIN }}" >> .env
+          echo "DEV_FRONTEND_URL=${{ secrets.DEV_FRONTEND_URL }}" >> .env
           
           echo "DEV_LOKI_HOST=${{ secrets.DEV_LOKI_HOST }}" >> .env
           echo "DEV_PROMETHEUS_PORT=${{ secrets.DEV_PROMETHEUS_PORT }}" >> .env
