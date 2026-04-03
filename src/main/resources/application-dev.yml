@@ -67,9 +67,9 @@ jwt:
 
 app:
   oauth2:
-    redirect-uri: "http://localhost:3000/oauth2/redirect"
-    login-page: "http://localhost:3000/login"
-    join-page: "http://localhost:3000/join"
+    redirect-uri: "${DEV_FRONTEND_URL}/oauth2/redirect"
+    login-page: "${DEV_FRONTEND_URL}/login"
+    join-page: "${DEV_FRONTEND_URL}/join"
   cors:
     allowed-origins: ${DEV_ALLOWED_ORIGINS}
   cookie:
