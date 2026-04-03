@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum RecommendResultCode implements ResultCode {
-    RECOMMEND_CARD_SUCCESS(HttpStatus.OK, "RC200001", "추천 카드 조회가 성공했습니다."),
+    GUEST_RECOMMEND_CARD_SUCCESS(HttpStatus.OK, "RC200001", "비회원 추천 카드 조회가 성공했습니다."),
+    RECOMMEND_CARD_SUCCESS(HttpStatus.OK, "RC200002", "추천 카드 조회가 성공했습니다."),
     ;
 
     private final HttpStatus status;
