@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
 public interface CardRepository {
     Card save(Card card);
@@ -20,6 +21,8 @@ public interface CardRepository {
     boolean existsByPlatformAndOriginId(Platform platform, String originId);
 
     Page<Card> findCardsWithImageByStatus(CardStatus status, Pageable pageable);
+
+    Slice<Card> findCardsWithImageByStatusRandom(CardStatus status, Pageable pageable);
 
     Page<Card> findCardsWithProductsByStatus(CardStatus status, Pageable pageable);
 
