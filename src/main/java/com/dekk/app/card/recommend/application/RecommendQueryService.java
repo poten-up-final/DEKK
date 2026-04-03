@@ -5,6 +5,7 @@ import com.dekk.app.activelog.domain.model.SwipeType;
 import com.dekk.app.card.application.CardCategoryQueryService;
 import com.dekk.app.card.application.CardQueryService;
 import com.dekk.app.card.application.dto.query.RecommendCandidateQuery;
+import com.dekk.app.card.application.dto.result.GuestCardResult;
 import com.dekk.app.card.application.dto.result.MemberCardResult;
 import com.dekk.app.card.recommend.application.dto.RecommendCardResult;
 import com.dekk.app.user.application.UserQueryService;
@@ -42,6 +43,10 @@ public class RecommendQueryService {
 
     public Slice<RecommendCardResult> getRecommendCards(Long userId, Pageable pageable) {
         return getRecommendCards(userId, pageable, null);
+    }
+
+    public Slice<GuestCardResult> getGuestCards(Pageable pageable) {
+        return cardQueryService.getCardsForGuestRandom(pageable);
     }
 
     public Slice<RecommendCardResult> getRecommendCards(Long userId, Pageable pageable, UUID startCardId) {
