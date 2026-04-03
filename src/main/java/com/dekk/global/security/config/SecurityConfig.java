@@ -58,6 +58,7 @@ public class SecurityConfig {
                                 "/i/v1/crawl/**",
                                 "/i/v1/inspections/**",
                                 "/w/v1/cards",
+                                "/w/v2/cards",
                                 "/w/v1/auth/refresh",
                                 "/w/v1/decks/shared/*/cards",
                                 "/adm/v1/auth/login")
