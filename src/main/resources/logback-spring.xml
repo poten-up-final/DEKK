@@ -83,9 +83,10 @@
     </appender>
 
     <springProfile name="dev">
+        <springProperty scope="context" name="DEV_LOKI_HOST" source="loki.host"/>
         <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
             <http>
-                <url>http://localhost:3100/loki/api/v1/push</url>
+                <url>${DEV_LOKI_HOST}/loki/api/v1/push</url>
             </http>
             <format>
                 <label>
