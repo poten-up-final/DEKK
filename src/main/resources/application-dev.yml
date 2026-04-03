@@ -74,7 +74,7 @@ app:
     allowed-origins: ${DEV_ALLOWED_ORIGINS}
   cookie:
     domain: ${DEV_COOKIE_DOMAIN}
-    secure: false
+    secure: true
 
 loki:
   host: ${DEV_LOKI_HOST}
