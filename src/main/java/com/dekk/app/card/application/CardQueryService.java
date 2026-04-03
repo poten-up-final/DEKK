@@ -20,6 +20,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,12 @@ public class CardQueryService {
     public Page<GuestCardResult> getCardsForGuest(Pageable pageable) {
         return cardRepository
                 .findCardsWithImageByStatus(CardStatus.APPROVED, pageable)
+                .map(GuestCardResult::from);
+    }
+
+    public Slice<GuestCardResult> getCardsForGuestRandom(Pageable pageable) {
+        return cardRepository
+                .findCardsWithImageByStatusRandom(CardStatus.APPROVED, pageable)
                 .map(GuestCardResult::from);
     }
 
