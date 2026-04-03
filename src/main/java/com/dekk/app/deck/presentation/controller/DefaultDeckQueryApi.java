@@ -4,10 +4,9 @@ import com.dekk.app.deck.domain.exception.DeckErrorCode;
 import com.dekk.app.deck.presentation.response.MyDeckCardResponse;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.response.PageResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import com.dekk.global.swagger.ApiErrorExceptions;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -20,5 +19,5 @@ public interface DefaultDeckQueryApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SDK20002)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<PageResponse<MyDeckCardResponse>>> getMyDefaultDeckCards(
-            @Parameter(hidden = true) CustomUserDetails userDetails, @ParameterObject Pageable pageable);
+            @LoginUser Long userId, @ParameterObject Pageable pageable);
 }

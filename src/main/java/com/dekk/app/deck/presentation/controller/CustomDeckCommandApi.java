@@ -4,7 +4,7 @@ import com.dekk.app.deck.domain.exception.DeckErrorCode;
 import com.dekk.app.deck.presentation.request.CustomDeckCreateRequest;
 import com.dekk.app.deck.presentation.request.CustomDeckUpdateRequest;
 import com.dekk.global.response.ApiResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import com.dekk.global.swagger.ApiErrorExceptions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,14 +20,13 @@ public interface CustomDeckCommandApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20005)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<Void>> createCustomDeck(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
-            @RequestBody(description = "생성할 커스텀덱 정보") CustomDeckCreateRequest request);
+            @LoginUser Long userId, @RequestBody(description = "생성할 커스텀덱 정보") CustomDeckCreateRequest request);
 
     @Operation(summary = "커스텀덱 이름 수정", description = "커스텀덱의 이름을 수정합니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20006)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<Void>> updateCustomDeckName(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
+            @LoginUser Long userId,
             @Parameter(description = "수정할 커스텀덱 ID", in = ParameterIn.PATH) Long customDeckId,
             @RequestBody(description = "수정할 덱 이름 정보") CustomDeckUpdateRequest request);
 
@@ -35,14 +34,14 @@ public interface CustomDeckCommandApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20007)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<Void>> deleteCustomDeck(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
+            @LoginUser Long userId,
             @Parameter(description = "삭제할 커스텀 보관함 ID", in = ParameterIn.PATH) Long customDeckId);
 
     @Operation(summary = "커스텀덱에 카드 저장", description = "커스텀덱에 특정 카드를 저장합니다. (최대 50장)")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20009)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<Void>> saveCardToCustomDeck(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
+            @LoginUser Long userId,
             @Parameter(description = "저장할 커스텀덱 ID", in = ParameterIn.PATH) Long customDeckId,
             @Parameter(description = "저장할 카드 ID", in = ParameterIn.PATH) Long cardId);
 
@@ -50,7 +49,7 @@ public interface CustomDeckCommandApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20010)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<Void>> removeCardFromCustomDeck(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
+            @LoginUser Long userId,
             @Parameter(description = "커스텀덱 ID", in = ParameterIn.PATH) Long customDeckId,
             @Parameter(description = "삭제할 카드 ID", in = ParameterIn.PATH) Long cardId);
 }

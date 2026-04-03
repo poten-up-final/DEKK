@@ -2,7 +2,7 @@ package com.dekk.app.deck.presentation.controller;
 
 import com.dekk.app.deck.domain.exception.DeckErrorCode;
 import com.dekk.global.response.ApiResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import com.dekk.global.swagger.ApiErrorExceptions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +17,5 @@ public interface DefaultDeckCommandApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "SD20004: 덱 내 카드 저장 취소 성공")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<Void>> removeCardFromDefaultDeck(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
-            @Parameter(description = "삭제할 카드 ID", in = ParameterIn.PATH) Long cardId);
+            @LoginUser Long userId, @Parameter(description = "삭제할 카드 ID", in = ParameterIn.PATH) Long cardId);
 }

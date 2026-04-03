@@ -4,7 +4,7 @@ import com.dekk.app.deck.domain.exception.DeckErrorCode;
 import com.dekk.app.deck.presentation.response.CustomDeckCardsResponse;
 import com.dekk.app.deck.presentation.response.CustomDeckResponse;
 import com.dekk.global.response.ApiResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import com.dekk.global.swagger.ApiErrorExceptions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,8 +19,7 @@ public interface CustomDeckQueryApi {
     @Operation(summary = "내 커스텀덱(쉐어덱) 목록 조회", description = "사용자가 생성한 커스텀덱 목록과 최신 카드 썸네일(imageUrl) 1장을 최신순으로 조회합니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20008)")
     @ApiErrorExceptions({DeckErrorCode.class})
-    ResponseEntity<ApiResponse<List<CustomDeckResponse>>> getMyCustomDecks(
-            @Parameter(hidden = true) CustomUserDetails userDetails);
+    ResponseEntity<ApiResponse<List<CustomDeckResponse>>> getMyCustomDecks(@LoginUser Long userId);
 
     @Operation(
             summary = "커스텀덱(쉐어덱) 내부 카드 목록 조회",
@@ -29,6 +28,5 @@ public interface CustomDeckQueryApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20011)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<CustomDeckCardsResponse>> getCustomDeckCards(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
-            @Parameter(description = "조회할 커스텀덱 ID", in = ParameterIn.PATH) Long customDeckId);
+            @LoginUser Long userId, @Parameter(description = "조회할 커스텀덱 ID", in = ParameterIn.PATH) Long customDeckId);
 }

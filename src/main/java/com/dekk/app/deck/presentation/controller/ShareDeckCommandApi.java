@@ -4,7 +4,7 @@ import com.dekk.app.deck.domain.exception.DeckErrorCode;
 import com.dekk.app.deck.presentation.request.SharedDeckJoinRequest;
 import com.dekk.app.deck.presentation.response.ShareTokenResponse;
 import com.dekk.global.response.ApiResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import com.dekk.global.swagger.ApiErrorExceptions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,8 +23,7 @@ public interface ShareDeckCommandApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20013)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<ShareTokenResponse>> turnOnShare(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
-            @Parameter(description = "공유를 켤 커스텀덱 ID", in = ParameterIn.PATH) Long customDeckId);
+            @LoginUser Long userId, @Parameter(description = "공유를 켤 커스텀덱 ID", in = ParameterIn.PATH) Long customDeckId);
 
     @Operation(
             summary = "쉐어덱 공유 끄기 (호스트 전용)",
@@ -32,8 +31,7 @@ public interface ShareDeckCommandApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20014)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<Void>> turnOffShare(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
-            @Parameter(description = "공유를 끌 쉐어덱 ID", in = ParameterIn.PATH) Long customDeckId);
+            @LoginUser Long userId, @Parameter(description = "공유를 끌 쉐어덱 ID", in = ParameterIn.PATH) Long customDeckId);
 
     @Operation(
             summary = "초대 링크로 쉐어덱 참여 (게스트 전용)",
@@ -41,8 +39,7 @@ public interface ShareDeckCommandApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20015)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<Void>> joinSharedDeck(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
-            @RequestBody(description = "참여용 토큰 정보") SharedDeckJoinRequest request);
+            @LoginUser Long userId, @RequestBody(description = "참여용 토큰 정보") SharedDeckJoinRequest request);
 
     @Operation(
             summary = "쉐어덱 자진 퇴장 (게스트 전용)",
@@ -51,6 +48,5 @@ public interface ShareDeckCommandApi {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공 (SD20016)")
     @ApiErrorExceptions({DeckErrorCode.class})
     ResponseEntity<ApiResponse<Void>> leaveSharedDeck(
-            @Parameter(hidden = true) CustomUserDetails userDetails,
-            @Parameter(description = "퇴장할 쉐어덱 ID", in = ParameterIn.PATH) Long sharedDeckId);
+            @LoginUser Long userId, @Parameter(description = "퇴장할 쉐어덱 ID", in = ParameterIn.PATH) Long sharedDeckId);
 }

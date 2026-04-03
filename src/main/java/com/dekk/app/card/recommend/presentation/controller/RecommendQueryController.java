@@ -5,14 +5,13 @@ import com.dekk.app.card.recommend.presentation.dto.response.RecommendCardRespon
 import com.dekk.app.card.recommend.presentation.response.RecommendResultCode;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.response.SliceResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,14 +27,14 @@ public class RecommendQueryController implements RecommendQueryApi {
     @Override
     @GetMapping
     public ResponseEntity<ApiResponse<SliceResponse<RecommendCardResponse>>> getRecommendCards(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @LoginUser Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) UUID startCardId) {
         Pageable pageable = PageRequest.of(page, size);
 
         Slice<RecommendCardResponse> result = recommendQueryService
-                .getRecommendCards(userDetails.getId(), pageable, startCardId)
+                .getRecommendCards(userId, pageable, startCardId)
                 .map(RecommendCardResponse::from);
 
         return ResponseEntity.ok(

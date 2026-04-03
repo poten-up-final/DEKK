@@ -3,7 +3,7 @@ package com.dekk.app.activelog.presentation.controller;
 import com.dekk.app.activelog.domain.exception.ActiveLogErrorCode;
 import com.dekk.app.activelog.presentation.request.SwipeRequest;
 import com.dekk.global.response.ApiResponse;
-import com.dekk.global.security.oauth2.CustomUserDetails;
+import com.dekk.global.security.annotation.LoginUser;
 import com.dekk.global.swagger.ApiErrorExceptions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,5 +21,5 @@ public interface ActiveLogApi {
     ResponseEntity<ApiResponse<Void>> swipeCard(
             @Parameter(description = "대상 카드 ID", in = ParameterIn.PATH) Long cardId,
             @RequestBody(description = "스와이프 요청 정보(LIKE/DISLIKE)") SwipeRequest request,
-            @Parameter(hidden = true) CustomUserDetails userDetails);
+            @LoginUser Long userId);
 }
