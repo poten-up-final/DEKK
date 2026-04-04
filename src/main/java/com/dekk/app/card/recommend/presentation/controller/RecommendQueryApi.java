@@ -26,7 +26,7 @@ public interface RecommendQueryApi {
                         description = "추천 카드 조회 성공",
                         content = @Content(schema = @Schema(implementation = RecommendCardResponse.class)))
             })
-    ResponseEntity<ApiResponse<SliceResponse<RecommendCardResponse>>> getRecommendCards(
+    ResponseEntity<ApiResponse<SliceResponse<?>>> getRecommendCards(
             @LoginUser Long userId,
             @Parameter(description = "페이지 번호", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 당 카드 수 (최대 50)", example = "10") @RequestParam(defaultValue = "10") @Max(50)

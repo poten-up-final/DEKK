@@ -1,5 +1,6 @@
 package com.dekk.app.card.recommend.presentation.controller;
 
+import com.dekk.app.card.presentation.response.GuestCardResponse;
 import com.dekk.app.card.recommend.application.RecommendQueryService;
 import com.dekk.app.card.recommend.presentation.dto.response.RecommendCardResponse;
 import com.dekk.app.card.recommend.presentation.response.RecommendResultCode;
@@ -10,7 +11,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,18 +26,22 @@ public class RecommendQueryController implements RecommendQueryApi {
 
     @Override
     @GetMapping
-    public ResponseEntity<ApiResponse<SliceResponse<RecommendCardResponse>>> getRecommendCards(
+    public ResponseEntity<ApiResponse<SliceResponse<?>>> getRecommendCards(
             @LoginUser Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) UUID startCardId) {
         Pageable pageable = PageRequest.of(page, size);
 
-        Slice<RecommendCardResponse> result = recommendQueryService
-                .getRecommendCards(userId, pageable, startCardId)
-                .map(RecommendCardResponse::from);
+        if (userId == null) {
+            SliceResponse<GuestCardResponse> result = SliceResponse.from(
+                    recommendQueryService.getGuestCards(pageable).map(GuestCardResponse::from));
+            return ResponseEntity.ok(ApiResponse.of(RecommendResultCode.GUEST_RECOMMEND_CARD_SUCCESS, result));
+        }
 
-        return ResponseEntity.ok(
-                ApiResponse.of(RecommendResultCode.RECOMMEND_CARD_SUCCESS, SliceResponse.from(result)));
+        SliceResponse<RecommendCardResponse> result = SliceResponse.from(recommendQueryService
+                .getRecommendCards(userId, pageable, startCardId)
+                .map(RecommendCardResponse::from));
+        return ResponseEntity.ok(ApiResponse.of(RecommendResultCode.RECOMMEND_CARD_SUCCESS, result));
     }
 }

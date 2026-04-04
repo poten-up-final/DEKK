@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +22,9 @@ public interface CardJpaRepository extends JpaRepository<Card, Long>, JpaSpecifi
             value = "SELECT c FROM Card c JOIN FETCH c.cardImage WHERE c.status = :status ORDER BY c.createdAt DESC",
             countQuery = "SELECT COUNT(c) FROM Card c WHERE c.status = :status")
     Page<Card> findCardsWithImageByStatus(@Param("status") CardStatus status, Pageable pageable);
+
+    @Query("SELECT c FROM Card c JOIN FETCH c.cardImage WHERE c.status = :status ORDER BY FUNCTION('random')")
+    Slice<Card> findCardsWithImageByStatusRandom(@Param("status") CardStatus status, Pageable pageable);
 
     @Query(
             value = "SELECT c.id FROM Card c WHERE c.status = :status ORDER BY c.createdAt DESC",
