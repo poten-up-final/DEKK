@@ -1,8 +1,16 @@
+buildscript {
+    dependencies {
+        classpath 'org.flywaydb:flyway-database-postgresql:11.7.2'
+        classpath 'org.postgresql:postgresql:42.7.10'
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.11'
     id 'io.spring.dependency-management' version '1.1.7'
     id "com.diffplug.spotless" version "8.3.0"
+    id 'org.flywaydb.flyway' version '11.7.2'
 }
 
 group = 'com.dekk'
@@ -26,6 +34,14 @@ configurations {
         extendsFrom annotationProcessor
     }
 }
+
+ext['flyway.version'] = '11.7.2'
+
+flyway {
+    baselineOnMigrate = true
+    locations = ['filesystem:src/main/resources/db/migration']
+}
+
 
 spotless {
     java {
