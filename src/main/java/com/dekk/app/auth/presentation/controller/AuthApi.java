@@ -25,7 +25,7 @@ public interface AuthApi {
                         description = "토큰 갱신 성공 (SA20001)"),
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(
                         responseCode = "401",
-                        description = "유효하지 않거나 만료된 리프레시 토큰 (EA40101)")
+                        description = "유효하지 않은 리프레시 토큰입니다 (EA40105)")
             })
     @ApiErrorExceptions({AuthErrorCode.class})
     ResponseEntity<ApiResponse<Void>> refreshToken(
