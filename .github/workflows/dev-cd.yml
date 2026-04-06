@@ -53,7 +53,7 @@ jobs:
       - name: 5. Flyway 마이그레이션 실행
         run: |
           ./gradlew flywayMigrate \
-            -Dflyway.url=jdbc:postgresql://${{ secrets.DEV_DB_HOST }}:${{ secrets.DEV_DB_PORT }}/dekk \
+            -Dflyway.url=jdbc:postgresql://${{ secrets.DEV_DB_EXTERNAL_HOST }}:${{ secrets.DEV_DB_EXTERNAL_PORT }}/dekk \
             -Dflyway.user=${{ secrets.DEV_FLYWAY_USERNAME }} \
             -Dflyway.password=${{ secrets.DEV_FLYWAY_PASSWORD }}
 
