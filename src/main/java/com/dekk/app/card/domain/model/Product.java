@@ -29,7 +29,7 @@ public class Product extends BaseTimeEntity {
 
     private Integer price;
 
-    @Column(name = "origin_id", nullable = false)
+    @Column(name = "origin_id")
     private String originId;
 
     private String option;

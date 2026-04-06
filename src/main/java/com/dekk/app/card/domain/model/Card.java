@@ -47,7 +47,7 @@ public class Card extends BaseTimeEntity {
     @Column(name = "tags")
     private String tags;
 
-    @Column(name = "origin_id", nullable = false, updatable = false)
+    @Column(name = "origin_id", updatable = false)
     private String originId;
 
     @Enumerated(EnumType.STRING)
@@ -55,7 +55,6 @@ public class Card extends BaseTimeEntity {
     private CardStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Platform platform;
 
     @Enumerated(EnumType.STRING)
