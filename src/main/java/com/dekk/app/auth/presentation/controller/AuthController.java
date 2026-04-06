@@ -5,6 +5,7 @@ import com.dekk.app.auth.application.command.TokenRefreshCommand;
 import com.dekk.app.auth.application.dto.result.TokenRefreshResult;
 import com.dekk.app.auth.presentation.response.AuthResultCode;
 import com.dekk.global.response.ApiResponse;
+import com.dekk.global.security.annotation.LoginUser;
 import com.dekk.global.security.util.CookieUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,7 @@ public class AuthController implements AuthApi {
     public ResponseEntity<ApiResponse<Void>> refreshToken(
             @CookieValue(value = CookieUtil.REFRESH_TOKEN_NAME, required = false) String refreshToken,
             HttpServletResponse response) {
+
         TokenRefreshResult result = authCommandService.refreshToken(new TokenRefreshCommand(refreshToken));
 
         cookieUtil.addCookie(response, CookieUtil.ACCESS_TOKEN_NAME, result.accessToken(), accessTokenMaxAge);
@@ -49,7 +51,11 @@ public class AuthController implements AuthApi {
 
     @Override
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<Void>> logout(@LoginUser Long userId, HttpServletResponse response) {
+
+        if (userId != null) {
+            authCommandService.logout(userId);
+        }
 
         cookieUtil.deleteCookie(response, CookieUtil.ACCESS_TOKEN_NAME);
         cookieUtil.deleteCookie(response, CookieUtil.REFRESH_TOKEN_NAME);

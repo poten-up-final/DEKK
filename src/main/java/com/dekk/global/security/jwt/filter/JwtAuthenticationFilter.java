@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,12 +26,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String ADMIN_TOKEN_COOKIE_NAME = "admin_access_token";
 
+    private static final String[] EXCLUDE_PATHS = {
+        "/w/v1/auth/refresh",
+        "/adm/v1/auth/login",
+        "/oauth2/authorization/**",
+        "/login/oauth2/code/**",
+        "/i/v1/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/v3/api-docs/**",
+        "/v3/api-docs",
+        "/actuator/**"
+    };
+
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, ObjectMapper objectMapper) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.objectMapper = objectMapper;
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return Arrays.stream(EXCLUDE_PATHS).anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     @Override
@@ -63,6 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             handleAuthenticationException(response, e);
             return;
         }
+
         filterChain.doFilter(request, response);
     }
 

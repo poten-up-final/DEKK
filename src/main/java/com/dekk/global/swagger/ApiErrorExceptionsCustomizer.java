@@ -39,11 +39,19 @@ public class ApiErrorExceptionsCustomizer implements OperationCustomizer {
                     ApiResponse response =
                             responses.computeIfAbsent(statusCode, k -> new ApiResponse().description("에러 응답"));
 
-                    if (response.getContent() == null) {
-                        response.setContent(new Content().addMediaType("application/json", new MediaType()));
+                    Content content = response.getContent();
+                    if (content == null) {
+                        content = new Content();
+                        response.setContent(content);
                     }
 
-                    response.getContent().get("application/json").addExamples(errorCode.name(), example);
+                    MediaType mediaType = content.get("application/json");
+                    if (mediaType == null) {
+                        mediaType = new MediaType();
+                        content.addMediaType("application/json", mediaType);
+                    }
+
+                    mediaType.addExamples(errorCode.name(), example);
                 }
             }
         }
