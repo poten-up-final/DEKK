@@ -50,7 +50,14 @@ jobs:
           chmod +x gradlew
           ./gradlew clean build -x test
 
-      - name: 5. Docker Compose로 Dev 서버 재실행
+      - name: 5. Flyway 마이그레이션 실행
+        run: |
+          ./gradlew flywayMigrate \
+            -Dflyway.url=jdbc:postgresql://${{ secrets.DEV_DB_HOST }}:${{ secrets.DEV_DB_PORT }}/dekk \
+            -Dflyway.user=${{ secrets.DEV_FLYWAY_USERNAME }} \
+            -Dflyway.password=${{ secrets.DEV_FLYWAY_PASSWORD }}
+
+      - name: 6. Docker Compose로 Dev 서버 재실행
         run: |
           docker compose -f docker-compose-dev.yml down
           docker compose -f docker-compose-dev.yml build --no-cache
