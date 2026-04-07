@@ -1,5 +1,7 @@
 package com.dekk.global.swagger;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import com.dekk.global.error.ErrorCode;
 import com.dekk.global.error.ErrorResponse;
 import io.swagger.v3.oas.models.Operation;
@@ -39,11 +41,20 @@ public class ApiErrorExceptionsCustomizer implements OperationCustomizer {
                     ApiResponse response =
                             responses.computeIfAbsent(statusCode, k -> new ApiResponse().description("에러 응답"));
 
-                    if (response.getContent() == null) {
-                        response.setContent(new Content().addMediaType("application/json", new MediaType()));
+                    Content content = response.getContent();
+                    if (content == null) {
+                        content = new Content();
+                        response.setContent(content);
                     }
 
-                    response.getContent().get("application/json").addExamples(errorCode.name(), example);
+                    String jsonMediaType = APPLICATION_JSON_VALUE;
+                    MediaType mediaType = content.get(jsonMediaType);
+                    if (mediaType == null) {
+                        mediaType = new MediaType();
+                        content.addMediaType(jsonMediaType, mediaType);
+                    }
+
+                    mediaType.addExamples(errorCode.name(), example);
                 }
             }
         }

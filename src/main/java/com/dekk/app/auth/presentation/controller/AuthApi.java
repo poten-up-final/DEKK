@@ -1,6 +1,9 @@
 package com.dekk.app.auth.presentation.controller;
 
+import com.dekk.app.auth.domain.exception.AuthErrorCode;
 import com.dekk.global.response.ApiResponse;
+import com.dekk.global.security.annotation.LoginUser;
+import com.dekk.global.swagger.ApiErrorExceptions;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -9,29 +12,33 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 
-@Tag(name = "인증 API", description = "토큰 재발급 및 로그아웃 API (HttpOnly 쿠키 기반)")
+@Tag(name = "인증/토큰 API", description = "쿠키 기반 JWT 토큰 갱신 및 로그아웃 API (HttpOnly 쿠키를 제어합니다.)")
 public interface AuthApi {
 
-    @Operation(summary = "토큰 재발급", description = "쿠키에 담긴 리프레시 토큰을 검증하여 새로운 액세스/리프레시 토큰 쿠키를 발급합니다.")
+    @Operation(
+            summary = "Access Token 갱신 (리프레시)",
+            description = "브라우저에 저장된 HttpOnly Refresh Token 쿠키를 이용해 Access Token 쿠키를 재발급 받습니다.")
     @ApiResponses(
             value = {
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(
                         responseCode = "200",
-                        description = "성공 (SA20001)"),
+                        description = "토큰 갱신 성공 (SA20001)"),
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(
                         responseCode = "401",
-                        description = "유효하지 않은 토큰(EA40101)")
+                        description = "토큰 없음/형식 오류(EA40101), 만료(EA40102), 유효하지 않음(EA40105)")
             })
+    @ApiErrorExceptions({AuthErrorCode.class})
     ResponseEntity<ApiResponse<Void>> refreshToken(
-            @Parameter(hidden = true) @CookieValue(value = "refresh_token") String refreshToken,
-            @Parameter(hidden = true) HttpServletResponse response);
+            @Parameter(hidden = true) @CookieValue(value = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response);
 
-    @Operation(summary = "로그아웃", description = "발급된 인증 쿠키를 모두 삭제(만료) 처리합니다.")
+    @Operation(summary = "로그아웃", description = "서버의 Refresh Token을 삭제 처리하고, 프론트 브라우저의 JWT 쿠키를 만료시킵니다.")
     @ApiResponses(
             value = {
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(
                         responseCode = "200",
                         description = "로그아웃 성공 (SA20002)")
             })
-    ResponseEntity<ApiResponse<Void>> logout(@Parameter(hidden = true) HttpServletResponse response);
+    @ApiErrorExceptions({AuthErrorCode.class})
+    ResponseEntity<ApiResponse<Void>> logout(@LoginUser Long userId, HttpServletResponse response);
 }
