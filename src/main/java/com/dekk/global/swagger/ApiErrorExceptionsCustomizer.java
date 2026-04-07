@@ -1,5 +1,7 @@
 package com.dekk.global.swagger;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import com.dekk.global.error.ErrorCode;
 import com.dekk.global.error.ErrorResponse;
 import io.swagger.v3.oas.models.Operation;
@@ -45,7 +47,7 @@ public class ApiErrorExceptionsCustomizer implements OperationCustomizer {
                         response.setContent(content);
                     }
 
-                    String jsonMediaType = org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+                    String jsonMediaType = APPLICATION_JSON_VALUE;
                     MediaType mediaType = content.get(jsonMediaType);
                     if (mediaType == null) {
                         mediaType = new MediaType();
