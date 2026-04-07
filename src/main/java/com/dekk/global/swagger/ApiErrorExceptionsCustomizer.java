@@ -45,10 +45,11 @@ public class ApiErrorExceptionsCustomizer implements OperationCustomizer {
                         response.setContent(content);
                     }
 
-                    MediaType mediaType = content.get("application/json");
+                    String jsonMediaType = org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+                    MediaType mediaType = content.get(jsonMediaType);
                     if (mediaType == null) {
                         mediaType = new MediaType();
-                        content.addMediaType("application/json", mediaType);
+                        content.addMediaType(jsonMediaType, mediaType);
                     }
 
                     mediaType.addExamples(errorCode.name(), example);
