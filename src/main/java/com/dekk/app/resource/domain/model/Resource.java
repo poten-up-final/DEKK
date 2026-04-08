@@ -60,8 +60,7 @@ public class Resource extends BaseTimeEntity {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
-    private Resource(
-            ResourceType resourceType, String originalKey, String originalFileName, LocalDateTime expiresAt) {
+    private Resource(ResourceType resourceType, String originalKey, String originalFileName, LocalDateTime expiresAt) {
         this.publicId = UUID.randomUUID();
         this.resourceType = resourceType;
         this.status = ResourceStatus.PENDING;
