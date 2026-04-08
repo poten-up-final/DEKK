@@ -1,7 +1,13 @@
 package com.dekk.global.security.jwt.filter;
 
+import com.dekk.app.admin.domain.exception.AdminBusinessException;
+import com.dekk.app.admin.domain.exception.AdminErrorCode;
+import com.dekk.app.admin.domain.repository.AdminTokenBlackListRepository;
+import com.dekk.app.admin.security.AdminUserDetails;
 import com.dekk.app.auth.domain.exception.AuthBusinessException;
 import com.dekk.app.auth.domain.exception.AuthErrorCode;
+import com.dekk.global.error.BusinessException;
+import com.dekk.global.error.ErrorCode;
 import com.dekk.global.error.ErrorResponse;
 import com.dekk.global.security.jwt.JwtTokenProvider;
 import com.dekk.global.security.util.CookieUtil;
@@ -43,10 +49,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
+    private final AdminTokenBlackListRepository adminTokenBlackListRepository;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, ObjectMapper objectMapper) {
+    public JwtAuthenticationFilter(
+            JwtTokenProvider jwtTokenProvider,
+            ObjectMapper objectMapper,
+            AdminTokenBlackListRepository adminTokenBlackListRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.objectMapper = objectMapper;
+        this.adminTokenBlackListRepository = adminTokenBlackListRepository;
     }
 
     @Override
@@ -66,8 +77,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String requestUri = request.getRequestURI();
         String jwt = null;
+        boolean isAdminRequest = requestUri.startsWith("/adm/");
 
-        if (requestUri.startsWith("/adm/")) {
+        if (isAdminRequest) {
             jwt = resolveTokenFromCookie(request, ADMIN_TOKEN_COOKIE_NAME);
         } else {
             jwt = resolveTokenFromCookie(request, CookieUtil.ACCESS_TOKEN_NAME);
@@ -83,11 +95,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (!jwtTokenProvider.isAccessToken(jwt)) {
                     throw new AuthBusinessException(AuthErrorCode.INVALID_TOKEN_TYPE);
                 }
+
                 Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
+
+                if (authentication.getPrincipal() instanceof AdminUserDetails) {
+                    if (adminTokenBlackListRepository.isBlackListed(jwt)) {
+                        throw new AdminBusinessException(AdminErrorCode.BLACKLISTED_TOKEN);
+                    }
+                }
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        } catch (AuthBusinessException e) {
-            handleAuthenticationException(response, e);
+        } catch (BusinessException e) {
+            handleAuthenticationException(response, e.errorCode());
             return;
         }
 
@@ -106,13 +126,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private void handleAuthenticationException(HttpServletResponse response, AuthBusinessException e)
-            throws IOException {
-        response.setStatus(e.errorCode().status().value());
+    private void handleAuthenticationException(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+        response.setStatus(errorCode.status().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        ErrorResponse errorResponse = ErrorResponse.from(e.errorCode());
+        ErrorResponse errorResponse = ErrorResponse.from(errorCode);
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

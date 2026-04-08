@@ -130,4 +130,15 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public long getRemainingExpiration(String token) {
+        try {
+            Claims claims = getClaims(token);
+            long expiration = claims.getExpiration().getTime();
+            long now = new Date().getTime();
+            return Math.max(0, (expiration - now) / 1000);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 }
