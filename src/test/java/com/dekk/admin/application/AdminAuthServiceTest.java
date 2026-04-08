@@ -76,7 +76,7 @@ class AdminAuthServiceTest {
 
         assertThatThrownBy(() -> adminAuthService.login(command))
             .isInstanceOf(AdminBusinessException.class)
-            .hasMessageContaining(AdminErrorCode.ADMIN_NOT_FOUND.getMessage());
+            .hasMessageContaining(AdminErrorCode.ADMIN_NOT_FOUND.message());
     }
 
     @Test
@@ -93,6 +93,6 @@ class AdminAuthServiceTest {
 
         assertThatThrownBy(() -> adminAuthService.login(command))
             .isInstanceOf(AdminBusinessException.class)
-            .hasMessageContaining(AdminErrorCode.INVALID_PASSWORD.getMessage());
+            .hasMessageContaining(AdminErrorCode.INVALID_PASSWORD.message());
     }
 }
