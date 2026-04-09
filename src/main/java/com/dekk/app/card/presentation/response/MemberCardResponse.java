@@ -3,10 +3,12 @@ package com.dekk.app.card.presentation.response;
 import com.dekk.app.card.application.dto.result.MemberCardResult;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
+import java.util.UUID;
 
 @Schema(description = "회원 카드 응답")
 public record MemberCardResponse(
-        @Schema(description = "카드 ID", example = "1") Long cardId,
+        @Schema(description = "카드 공개 ID", example = "550e8400-e29b-41d4-a716-446655440000")
+        UUID publicId,
 
         @Schema(description = "카드 이미지 URL", example = "https://example.com/card.jpg")
         String cardImageUrl,
@@ -41,7 +43,7 @@ public record MemberCardResponse(
 
     public static MemberCardResponse from(MemberCardResult result) {
         return new MemberCardResponse(
-                result.cardId(),
+                result.publicId(),
                 result.cardImageUrl(),
                 result.height(),
                 result.weight(),
