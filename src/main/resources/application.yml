@@ -42,7 +42,3 @@ management:
         http.server.requests: 0.5, 0.95, 0.99
       slo:
         http.server.requests: 100ms, 250ms, 500ms, 1s, 5s
-
-worker:
-  n8n:
-    webhook-url: ${N8N_WEBHOOK_URL:http://localhost:5678/webhook/outfit-filter}
