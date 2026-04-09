@@ -13,6 +13,7 @@ CREATE TABLE public.resources
     expires_at         TIMESTAMP WITHOUT TIME ZONE,
     created_at         TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at         TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    deleted_at         TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_resources PRIMARY KEY (id),
     CONSTRAINT uk_resources_public_id UNIQUE (public_id)
 );
