@@ -45,7 +45,7 @@ public class Resource extends BaseTimeEntity {
     @Column(name = "original_key", length = 500)
     private String originalKey;
 
-    @Column(name = "original_file_name", length = 255)
+    @Column(name = "original_file_name")
     private String originalFileName;
 
     @Column(name = "processed_key", length = 500)
@@ -80,12 +80,19 @@ public class Resource extends BaseTimeEntity {
         if (resourceType == null) {
             throw new ResourceBusinessException(ResourceErrorCode.RESOURCE_TYPE_IS_REQUIRED);
         }
+
         if (originalKey == null || originalKey.isBlank()) {
             throw new ResourceBusinessException(ResourceErrorCode.ORIGINAL_KEY_IS_REQUIRED);
         }
+
         if (originalFileName == null || originalFileName.isBlank()) {
             throw new ResourceBusinessException(ResourceErrorCode.ORIGINAL_FILE_NAME_IS_REQUIRED);
         }
+
+        if (originalFileName.length() > 255) {
+            throw new ResourceBusinessException(ResourceErrorCode.ORIGINAL_FILE_NAME_TOO_LONG);
+        }
+
         if (expiresAt == null) {
             throw new ResourceBusinessException(ResourceErrorCode.EXPIRES_AT_IS_REQUIRED);
         }

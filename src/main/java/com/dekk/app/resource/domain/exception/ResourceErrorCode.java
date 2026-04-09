@@ -8,6 +8,7 @@ public enum ResourceErrorCode implements ErrorCode {
     ORIGINAL_KEY_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ER40002", "원본 파일 키는 필수값입니다."),
     ORIGINAL_FILE_NAME_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ER40003", "원본 파일명은 필수값입니다."),
     EXPIRES_AT_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ER40004", "만료 시간은 필수값입니다."),
+    ORIGINAL_FILE_NAME_TOO_LONG(HttpStatus.BAD_REQUEST, "ER40005", "원본 파일명은 255자를 초과할 수 없습니다.")
     ;
 
     private final HttpStatus httpStatus;
