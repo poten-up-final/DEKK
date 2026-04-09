@@ -77,6 +77,12 @@ app:
     domain: ${DEV_COOKIE_DOMAIN}
     secure: true
 
+storage:
+  region: ap-northeast-2
+  bucket: dekk-resources-dev
+  presigned-url-expiration: 5m
+  cdn-base-url: https://dev-cdn.dekk.co.kr
+
 loki:
   host: ${DEV_LOKI_HOST}
 
