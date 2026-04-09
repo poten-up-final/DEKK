@@ -99,6 +99,9 @@ public class Resource extends BaseTimeEntity {
     }
 
     public void markAsProcessed(String processedKey, String imageUrl, Long fileSize, String contentType) {
+        validateStatusChange(ResourceStatus.PROCESSED);
+        validateMarkAsProcessedParameters(processedKey, imageUrl, fileSize, contentType);
+
         this.status = ResourceStatus.PROCESSED;
         this.processedKey = processedKey;
         this.imageUrl = imageUrl;
@@ -106,12 +109,41 @@ public class Resource extends BaseTimeEntity {
         this.contentType = contentType;
     }
 
+    private static void validateMarkAsProcessedParameters(
+            String processedKey, String imageUrl, Long fileSize, String contentType) {
+        if (processedKey == null || processedKey.isBlank()) {
+            throw new ResourceBusinessException(ResourceErrorCode.PROCESSED_KEY_IS_REQUIRED);
+        }
+
+        if (imageUrl == null || imageUrl.isBlank()) {
+            throw new ResourceBusinessException(ResourceErrorCode.IMAGE_URL_IS_REQUIRED);
+        }
+
+        if (fileSize == null) {
+            throw new ResourceBusinessException(ResourceErrorCode.FILE_SIZE_IS_REQUIRED);
+        }
+
+        if (contentType == null || contentType.isBlank()) {
+            throw new ResourceBusinessException(ResourceErrorCode.CONTENT_TYPE_IS_REQUIRED);
+        }
+    }
+
     public void markAsFailed() {
+        validateStatusChange(ResourceStatus.FAILED);
+
         this.status = ResourceStatus.FAILED;
     }
 
     public void markAsExpired() {
+        validateStatusChange(ResourceStatus.EXPIRED);
+
         this.status = ResourceStatus.EXPIRED;
+    }
+
+    private void validateStatusChange(ResourceStatus targetStatus) {
+        if (!this.status.canChangeTo(targetStatus)) {
+            throw new ResourceBusinessException(ResourceErrorCode.INVALID_STATUS_CHANGE);
+        }
     }
 
     public boolean isProcessed() {

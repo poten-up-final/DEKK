@@ -20,4 +20,12 @@ public enum ResourceStatus {
     public boolean canBeUsed() {
         return this == PROCESSED;
     }
+
+    public boolean canChangeTo(ResourceStatus targetStatus) {
+        if (this == PENDING) {
+            return targetStatus == PROCESSED || targetStatus == FAILED || targetStatus == EXPIRED;
+        }
+
+        return false;
+    }
 }
