@@ -78,10 +78,10 @@ app:
     secure: true
 
 storage:
-  region: ap-northeast-2
-  bucket: dekk-resources-dev
+  region: ${AWS_S3_REGION}
+  bucket: ${AWS_S3_RESOURCE_BUCKET}
   presigned-url-expiration: 5m
-  cdn-base-url: https://dev-cdn.dekk.co.kr
+  cdn-base-url: ${CDN_BASE_URL}
 
 loki:
   host: ${DEV_LOKI_HOST}
