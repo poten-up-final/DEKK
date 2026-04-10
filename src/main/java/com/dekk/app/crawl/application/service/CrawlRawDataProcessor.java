@@ -57,7 +57,7 @@ public class CrawlRawDataProcessor {
                 .values()
                 .stream()
                 .filter(cmd -> !cardRepository.existsByPlatformAndOriginId(cmd.platform(), cmd.originId()))
-                .map(Card::create)
+                .map(Card::createByCrawl)
                 .toList();
         cardRepository.saveAll(cards);
     }
