@@ -1,5 +1,6 @@
 package com.dekk.app.card.domain.model;
 
+import com.dekk.app.card.application.dto.command.CardCreateByUserCommand;
 import com.dekk.app.card.application.dto.command.CardCreateCommand;
 import com.dekk.app.card.domain.exception.CardBusinessException;
 import com.dekk.app.card.domain.exception.CardErrorCode;
@@ -114,26 +115,46 @@ public class Card extends BaseTimeEntity {
         return card;
     }
 
-    public static Card createByUser(
-            Long resourceId, TargetGender targetGender, Integer height, Integer weight, String tags) {
+    public static Card createByUser(CardCreateByUserCommand command) {
+        validateUserCardParameters(command);
 
-        if (resourceId == null) {
+        Card card = new Card(
+                null,
+                command.tags(),
+                null,
+                null,
+                command.targetGender(),
+                command.height(),
+                command.weight(),
+                command.resourceId());
+
+        if (command.products() != null) {
+            command.products().stream()
+                    .map(cmd -> Product.createByUser(
+                            cmd.resourceId(), cmd.brand(), cmd.name(), cmd.price(), cmd.productUrl(), cmd.option()))
+                    .map(product -> CardProduct.create(card, product))
+                    .forEach(card.cardProducts::add);
+        }
+
+        return card;
+    }
+
+    private static void validateUserCardParameters(CardCreateByUserCommand command) {
+        if (command.resourceId() == null) {
             throw new CardBusinessException(CardErrorCode.RESOURCE_ID_IS_REQUIRED_FOR_USER_CARD);
         }
 
-        if (targetGender == null) {
+        if (command.targetGender() == null) {
             throw new CardBusinessException(CardErrorCode.TARGET_GENDER_IS_REQUIRED);
         }
 
-        if (height == null) {
+        if (command.height() == null) {
             throw new CardBusinessException(CardErrorCode.HEIGHT_IS_REQUIRED);
         }
 
-        if (weight == null) {
+        if (command.weight() == null) {
             throw new CardBusinessException(CardErrorCode.WEIGHT_IS_REQUIRED);
         }
-
-        return new Card(null, tags, null, null, targetGender, height, weight, resourceId);
     }
 
     public void approve() {
