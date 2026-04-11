@@ -87,4 +87,11 @@ public class CardQueryService {
     public Optional<MemberCardResult> findByPublicId(UUID publicId) {
         return cardRepository.findByPublicId(publicId).map(MemberCardResult::from);
     }
+
+    public Long getCardIdByPublicId(UUID publicId) {
+        return cardRepository
+                .findByPublicId(publicId)
+                .map(Card::getId)
+                .orElseThrow(() -> new CardBusinessException(CardErrorCode.CARD_NOT_FOUND));
+    }
 }
