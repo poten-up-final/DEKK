@@ -1,7 +1,9 @@
 package com.dekk.app.resource.infrastructure.storage;
 
 import com.dekk.app.resource.domain.dto.PresignedUploadUrl;
+import com.dekk.app.resource.domain.model.enums.ResourceType;
 import com.dekk.app.resource.domain.storage.StorageClient;
+import com.dekk.app.resource.domain.storage.StorageKeyGenerator;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -21,7 +23,9 @@ public class S3StorageClient implements StorageClient {
     private final StorageProperties properties;
 
     @Override
-    public PresignedUploadUrl generatePresignedUploadUrl(String key, String contentType) {
+    public PresignedUploadUrl generatePresignedUploadUrl(
+            ResourceType resourceType, String originalFileName, String contentType) {
+        String key = StorageKeyGenerator.generateKey(resourceType, originalFileName);
         Duration expiration = properties.getPresignedUrlExpiration();
 
         PutObjectRequest putRequest = PutObjectRequest.builder()
@@ -36,7 +40,7 @@ public class S3StorageClient implements StorageClient {
                 .build();
 
         PresignedPutObjectRequest presigned = s3Presigner.presignPutObject(presignRequest);
-        return new PresignedUploadUrl(presigned.url().toString(), expiration);
+        return new PresignedUploadUrl(presigned.url().toString(), key, expiration);
     }
 
     @Override

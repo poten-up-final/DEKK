@@ -13,6 +13,8 @@ public enum ResourceErrorCode implements ErrorCode {
     IMAGE_URL_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ER40007", "이미지 URL은 필수값입니다."),
     FILE_SIZE_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ER40008", "파일 크기는 필수값입니다."),
     CONTENT_TYPE_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ER40009", "컨텐츠 타입은 필수값입니다."),
+    FILE_EXTENSION_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ER40010", "파일 확장자는 필수입니다."),
+    UNSUPPORTED_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "ER40011", "지원하지 않는 파일 확장자입니다."),
 
     INVALID_STATUS_CHANGE(HttpStatus.CONFLICT, "ER40901", "현재 상태에서는 상태 변경이 불가능합니다.");
 
