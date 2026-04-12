@@ -1,4 +1,4 @@
-package com.dekk.user.application;
+package com.dekk.app.user.application;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;

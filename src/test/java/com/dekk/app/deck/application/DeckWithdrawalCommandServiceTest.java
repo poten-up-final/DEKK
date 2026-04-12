@@ -1,4 +1,4 @@
-package com.dekk.deck.application;
+package com.dekk.app.deck.application;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;

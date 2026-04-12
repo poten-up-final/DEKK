@@ -1,12 +1,14 @@
-package com.dekk.card.recommend.application;
+package com.dekk.app.card.recommend.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
 import com.dekk.app.card.application.dto.result.MemberCardResult;
 import com.dekk.app.card.recommend.application.RecommendScoringService;
+
 import java.util.List;
 import java.util.Map;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -86,7 +88,7 @@ class RecommendScoringServiceTest {
         @DisplayName("후보 카드가 없으면 빈 리스트를 반환한다")
         void shouldReturnEmpty_whenNoCandidates() {
             List<MemberCardResult> result = scoringService.rank(
-                    175, 70, List.of(), Map.of(), Map.of());
+                175, 70, List.of(), Map.of(), Map.of());
 
             assertThat(result).isEmpty();
         }
@@ -98,8 +100,8 @@ class RecommendScoringServiceTest {
             MemberCardResult cardB = card(2L, 175, 70);
 
             Map<Long, List<Long>> categoryMap = Map.of(
-                    1L, List.of(1L),
-                    2L, List.of(2L));
+                1L, List.of(1L),
+                2L, List.of(2L));
             Map<Long, Double> preferences = Map.of(1L, 0.8, 2L, 0.2);
 
             List<MemberCardResult> result = scoringService.rank(175, 70, List.of(cardA, cardB), categoryMap, preferences);
@@ -118,7 +120,7 @@ class RecommendScoringServiceTest {
             MemberCardResult cardB = card(2L, 190, 90);
 
             List<MemberCardResult> result = scoringService.rank(
-                    175, 70, List.of(cardB, cardA), Map.of(), Map.of());
+                175, 70, List.of(cardB, cardA), Map.of(), Map.of());
 
             assertThat(result.getFirst().cardId()).isEqualTo(1L);
         }
@@ -133,8 +135,8 @@ class RecommendScoringServiceTest {
             MemberCardResult cardB = card(2L, null, null);
 
             Map<Long, List<Long>> categoryMap = Map.of(
-                    1L, List.of(1L),
-                    2L, List.of(2L));
+                1L, List.of(1L),
+                2L, List.of(2L));
             Map<Long, Double> preferences = Map.of(1L, 0.8, 2L, 0.2);
 
             List<MemberCardResult> result = scoringService.rank(null, null, List.of(cardB, cardA), categoryMap, preferences);
@@ -150,8 +152,8 @@ class RecommendScoringServiceTest {
             MemberCardResult cardB = card(2L, 175, 70);
 
             Map<Long, List<Long>> categoryMap = Map.of(
-                    1L, List.of(1L),
-                    2L, List.of(1L));
+                1L, List.of(1L),
+                2L, List.of(1L));
             Map<Long, Double> preferences = Map.of(1L, 0.5);
 
             List<MemberCardResult> result = scoringService.rank(175, 70, List.of(cardA, cardB), categoryMap, preferences);

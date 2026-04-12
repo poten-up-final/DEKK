@@ -1,4 +1,4 @@
-package com.dekk.activelog.infrastructure.jpa;
+package com.dekk.app.activelog.infrastructure.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,6 +6,7 @@ import com.dekk.app.activelog.domain.model.ActiveLog;
 import com.dekk.app.activelog.domain.model.SwipeType;
 
 import com.dekk.app.activelog.infrastructure.jpa.ActiveLogJpaRepository;
+
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;

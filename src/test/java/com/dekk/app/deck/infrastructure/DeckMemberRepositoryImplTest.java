@@ -1,4 +1,4 @@
-package com.dekk.deck.infrastructure;
+package com.dekk.app.deck.infrastructure;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;

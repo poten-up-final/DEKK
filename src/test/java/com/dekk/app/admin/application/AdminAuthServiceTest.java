@@ -1,4 +1,4 @@
-package com.dekk.admin.application;
+package com.dekk.app.admin.application;
 
 import com.dekk.app.admin.application.AdminAuthService;
 import com.dekk.app.admin.application.dto.command.AdminLoginCommand;

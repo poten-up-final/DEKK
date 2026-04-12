@@ -1,4 +1,4 @@
-package com.dekk.deck.application;
+package com.dekk.app.deck.application;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

@@ -1,4 +1,4 @@
-package com.dekk.card.recommend.application;
+package com.dekk.app.card.recommend.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,11 +41,16 @@ class RecommendQueryServiceTest {
     private static final Long USER_ID = 1L;
     private static final int SIZE = 10;
 
-    @Mock private CardQueryService cardQueryService;
-    @Mock private UserQueryService userQueryService;
-    @Mock private ActiveLogQueryService activeLogQueryService;
-    @Mock private CardCategoryQueryService cardCategoryQueryService;
-    @Mock private RecommendScoringService recommendScoringService;
+    @Mock
+    private CardQueryService cardQueryService;
+    @Mock
+    private UserQueryService userQueryService;
+    @Mock
+    private ActiveLogQueryService activeLogQueryService;
+    @Mock
+    private CardCategoryQueryService cardCategoryQueryService;
+    @Mock
+    private RecommendScoringService recommendScoringService;
 
     @InjectMocks
     private RecommendQueryService recommendQueryService;
@@ -61,7 +66,7 @@ class RecommendQueryServiceTest {
             given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
             given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
+                .willAnswer(inv -> inv.getArgument(2));
             given(cardQueryService.getLatestCards(any(), anyInt())).willReturn(List.of());
         }
 
@@ -73,12 +78,12 @@ class RecommendQueryServiceTest {
             Card card30 = mockCard(30L);
 
             given(cardQueryService.getRecommendCandidates(any()))
-                    .willReturn(List.of(card10, card20, card30));
+                .willReturn(List.of(card10, card20, card30));
             given(activeLogQueryService.getAllSwipedCardIds(USER_ID))
-                    .willReturn(Set.of(10L, 20L));
+                .willReturn(Set.of(10L, 20L));
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             List<RecommendCardResult> recommended = recommendedOnly(result);
             assertThat(recommended).hasSize(1);
@@ -92,12 +97,12 @@ class RecommendQueryServiceTest {
             Card card2 = mockCard(2L);
 
             given(cardQueryService.getRecommendCandidates(any()))
-                    .willReturn(List.of(card1, card2));
+                .willReturn(List.of(card1, card2));
             given(activeLogQueryService.getAllSwipedCardIds(USER_ID))
-                    .willReturn(Set.of());
+                .willReturn(Set.of());
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(2);
         }
@@ -109,12 +114,12 @@ class RecommendQueryServiceTest {
             Card card2 = mockCard(2L);
 
             given(cardQueryService.getRecommendCandidates(any()))
-                    .willReturn(List.of(card1, card2));
+                .willReturn(List.of(card1, card2));
             given(activeLogQueryService.getAllSwipedCardIds(USER_ID))
-                    .willReturn(Set.of(1L, 2L));
+                .willReturn(Set.of(1L, 2L));
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(recommendedOnly(result)).isEmpty();
         }
@@ -139,12 +144,12 @@ class RecommendQueryServiceTest {
             List<Card> candidates = mockCards(10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L);
             given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
+                .willAnswer(inv -> inv.getArgument(2));
             given(cardQueryService.getLatestCards(any(), anyInt()))
-                    .willReturn(memberCards(100L, 101L, 102L));
+                .willReturn(memberCards(100L, 101L, 102L));
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(7);
             assertThat(normalOnly(result)).hasSize(3);
@@ -158,12 +163,12 @@ class RecommendQueryServiceTest {
             List<Card> candidates = mockCards(1L, 2L, 3L);
             given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
+                .willAnswer(inv -> inv.getArgument(2));
             given(cardQueryService.getLatestCards(any(), anyInt()))
-                    .willReturn(memberCards(100L, 101L, 102L, 103L, 104L, 105L, 106L));
+                .willReturn(memberCards(100L, 101L, 102L, 103L, 104L, 105L, 106L));
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(3);
             assertThat(normalOnly(result)).hasSize(7);
@@ -175,12 +180,12 @@ class RecommendQueryServiceTest {
             List<Card> candidates = mockCards(1L);
             given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
+                .willAnswer(inv -> inv.getArgument(2));
             given(cardQueryService.getLatestCards(any(), anyInt()))
-                    .willReturn(memberCards(100L));
+                .willReturn(memberCards(100L));
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             assertThat(result).anyMatch(RecommendCardResult::recommended);
             assertThat(result).anyMatch(r -> !r.recommended());
@@ -192,20 +197,20 @@ class RecommendQueryServiceTest {
             List<Card> candidates = mockCards(1L, 2L);
             given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
+                .willAnswer(inv -> inv.getArgument(2));
             // 일반 카드 ID 100, 101은 추천 카드 ID와 겹치지 않음
             given(cardQueryService.getLatestCards(any(), anyInt()))
-                    .willReturn(memberCards(100L, 101L));
+                .willReturn(memberCards(100L, 101L));
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             Set<Long> recommendedIds = recommendedOnly(result).stream()
-                    .map(r -> r.card().cardId())
-                    .collect(java.util.stream.Collectors.toSet());
+                .map(r -> r.card().cardId())
+                .collect(java.util.stream.Collectors.toSet());
             Set<Long> normalIds = normalOnly(result).stream()
-                    .map(r -> r.card().cardId())
-                    .collect(java.util.stream.Collectors.toSet());
+                .map(r -> r.card().cardId())
+                .collect(java.util.stream.Collectors.toSet());
 
             assertThat(recommendedIds).doesNotContainAnyElementsOf(normalIds);
         }
@@ -223,7 +228,7 @@ class RecommendQueryServiceTest {
             given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
             given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
+                .willAnswer(inv -> inv.getArgument(2));
             given(cardQueryService.getLatestCards(any(), anyInt())).willReturn(List.of());
         }
 
@@ -233,7 +238,7 @@ class RecommendQueryServiceTest {
             given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(null, 170, 65));
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(result).isEmpty();
         }
@@ -246,7 +251,7 @@ class RecommendQueryServiceTest {
             given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(1);
         }
@@ -271,10 +276,10 @@ class RecommendQueryServiceTest {
             given(cardCategoryQueryService.getCardCategoryMap(List.of())).willReturn(Map.of());
             given(recommendScoringService.calculateCategoryPreferenceRatios(List.of())).willReturn(Map.of());
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
+                .willAnswer(inv -> inv.getArgument(2));
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(result).isEmpty();
         }
@@ -287,10 +292,10 @@ class RecommendQueryServiceTest {
             given(recommendScoringService.calculateCategoryPreferenceRatios(List.of())).willReturn(Map.of());
             given(cardCategoryQueryService.getCardCategoryMap(List.of())).willReturn(Map.of());
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
+                .willAnswer(inv -> inv.getArgument(2));
 
             List<RecommendCardResult> result =
-                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(result).isEmpty();
         }
@@ -328,7 +333,7 @@ class RecommendQueryServiceTest {
 
     private List<MemberCardResult> memberCards(Long... ids) {
         return java.util.Arrays.stream(ids)
-                .map(id -> new MemberCardResult(id, null, null, null, null, List.of(), List.of()))
-                .toList();
+            .map(id -> new MemberCardResult(id, null, null, null, null, List.of(), List.of()))
+            .toList();
     }
 }
