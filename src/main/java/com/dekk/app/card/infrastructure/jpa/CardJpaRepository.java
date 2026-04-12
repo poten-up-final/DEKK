@@ -54,6 +54,9 @@ public interface CardJpaRepository extends JpaRepository<Card, Long>, JpaSpecifi
             + "WHERE c.publicId = :publicId AND c.status = 'APPROVED'")
     Optional<Card> findByPublicIdWithProducts(@Param("publicId") UUID publicId);
 
+    @Query("SELECT c.id FROM Card c WHERE c.publicId = :publicId")
+    Optional<Long> findIdByPublicId(@Param("publicId") UUID publicId);
+
     // TODO: approvedAt 정렬로 변경 필요
     @Query("SELECT c.id FROM Card c WHERE c.status = 'APPROVED' AND c.id NOT IN :excludeIds ORDER BY c.updatedAt DESC")
     List<Long> findLatestApprovedCardIdsExcluding(@Param("excludeIds") List<Long> excludeIds, Pageable pageable);
