@@ -74,8 +74,8 @@ class CardTest {
             // given
             List<ProductCreateByUserCommand> products = List.of(
                     new ProductCreateByUserCommand(
-                            2L, "무신사 스탠다드", "릴렉스 핏 티셔츠", 19900, "https://example.com/1", "WHITE / L"),
-                    new ProductCreateByUserCommand(3L, "나이키", "에어포스 1", 129000, "https://example.com/2", null));
+                            2L, "무신사 스탠다드", "릴렉스 핏 티셔츠", "https://example.com/1"),
+                    new ProductCreateByUserCommand(3L, "나이키", "에어포스 1", "https://example.com/2"));
 
             CardCreateByUserCommand command =
                     new CardCreateByUserCommand(1L, TargetGender.MEN, 175, 70, "캐주얼,데일리", products);

@@ -159,26 +159,7 @@ class MusinsaCrawlDataParserTest {
             assertThat(product.originId()).isEqualTo("5916242");
             assertThat(product.brand()).isEqualTo("어반디타입");
             assertThat(product.name()).isEqualTo("파리스 스트라이프 롱슬리브 폴로 티셔츠_버건디");
-            assertThat(product.price()).isEqualTo(32990);
             assertThat(product.productUrl()).isEqualTo("https://www.musinsa.com/products/5916242");
-        }
-
-        @Test
-        @DisplayName("goods의 options에서 goodsNo 매칭으로 옵션을 파싱한다")
-        void parseProductOption() throws JsonProcessingException {
-            CardCreateCommand command = parser.parse(RAW_DATA).get(0);
-            ProductCreateCommand product = command.productCreateCommands().get(0);
-
-            assertThat(product.option()).isEqualTo("M");
-        }
-
-        @Test
-        @DisplayName("goods의 isMatched가 true이면 isSimilar는 false이다")
-        void parseIsSimilar() throws JsonProcessingException {
-            CardCreateCommand command = parser.parse(RAW_DATA).get(0);
-            ProductCreateCommand product = command.productCreateCommands().get(0);
-
-            assertThat(product.isSimilar()).isFalse();
         }
     }
 
@@ -246,22 +227,5 @@ class MusinsaCrawlDataParserTest {
                 .isInstanceOf(JsonProcessingException.class);
         }
 
-        @Test
-        @DisplayName("goods에서 isMatched가 false이면 isSimilar는 true이다")
-        void unmatchedGoodsIsSimilar() throws JsonProcessingException {
-            String rawData = """
-                [{"id": "123", "model": {}, "tags": [], "medias": [],
-                  "status": {"snapDisplayStatus": "DISPLAY"},
-                  "goods": [{"goodsNo": "100", "isMatched": false, "options": []}],
-                  "goods_detail_list": [{"goodsNo": "100", "goodsName": "테스트", "price": 1000,
-                    "brandName": "브랜드", "imageUrl": "https://img.com/1.jpg", "linkUrl": "https://link.com"}]
-                }]
-                """;
-
-            CardCreateCommand command = parser.parse(rawData).get(0);
-            ProductCreateCommand product = command.productCreateCommands().get(0);
-
-            assertThat(product.isSimilar()).isTrue();
-        }
     }
 }

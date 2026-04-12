@@ -30,15 +30,8 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    private Integer price;
-
     @Column(name = "origin_id")
     private String originId;
-
-    private String option;
-
-    @Column(name = "is_similar", nullable = false)
-    private boolean isSimilar;
 
     @Column(name = "product_url", columnDefinition = "text")
     private String productUrl;
@@ -50,20 +43,14 @@ public class Product extends BaseTimeEntity {
             ProductImage productImage,
             String brand,
             String name,
-            Integer price,
             String originId,
-            String option,
-            Boolean isSimilar,
             String productUrl,
             boolean isActive,
             Long resourceId) {
         this.productImage = productImage;
         this.brand = brand;
         this.name = name;
-        this.price = price;
         this.originId = originId;
-        this.option = option;
-        this.isSimilar = isSimilar;
         this.productUrl = productUrl;
         this.isActive = isActive;
         this.resourceId = resourceId;
@@ -84,10 +71,7 @@ public class Product extends BaseTimeEntity {
                 productImage,
                 command.brand(),
                 command.name(),
-                command.price(),
                 command.originId(),
-                command.option(),
-                command.isSimilar(),
                 command.productUrl(),
                 command.isActive(),
                 null);
@@ -96,8 +80,7 @@ public class Product extends BaseTimeEntity {
         return product;
     }
 
-    public static Product createByUser(
-            Long resourceId, String brand, String name, Integer price, String productUrl, String option) {
+    public static Product createByUser(Long resourceId, String brand, String name, String productUrl) {
 
         if (resourceId == null) {
             throw new CardBusinessException(CardErrorCode.RESOURCE_ID_IS_REQUIRED_FOR_USER_PRODUCT);
@@ -111,14 +94,10 @@ public class Product extends BaseTimeEntity {
             throw new CardBusinessException(CardErrorCode.PRODUCT_NAME_IS_REQUIRED_TO_CREATE);
         }
 
-        if (price == null) {
-            throw new CardBusinessException(CardErrorCode.PRODUCT_PRICE_IS_REQUIRED);
-        }
-
         if (productUrl == null || productUrl.isBlank()) {
             throw new CardBusinessException(CardErrorCode.PRODUCT_URL_IS_REQUIRED);
         }
 
-        return new Product(null, brand, name, price, null, option, false, productUrl, true, resourceId);
+        return new Product(null, brand, name, null, productUrl, true, resourceId);
     }
 }

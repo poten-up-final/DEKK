@@ -130,8 +130,7 @@ public class Card extends BaseTimeEntity {
 
         if (command.products() != null) {
             command.products().stream()
-                    .map(cmd -> Product.createByUser(
-                            cmd.resourceId(), cmd.brand(), cmd.name(), cmd.price(), cmd.productUrl(), cmd.option()))
+                    .map(cmd -> Product.createByUser(cmd.resourceId(), cmd.brand(), cmd.name(), cmd.productUrl()))
                     .map(product -> CardProduct.create(card, product))
                     .forEach(card.cardProducts::add);
         }
