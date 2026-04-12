@@ -87,4 +87,8 @@ public class CardQueryService {
     public Optional<MemberCardResult> findByPublicId(UUID publicId) {
         return cardRepository.findByPublicId(publicId).map(MemberCardResult::from);
     }
+
+    public Optional<GuestCardResult> findByPublicIdForGuest(UUID publicId) {
+        return cardRepository.findByPublicId(publicId).map(GuestCardResult::from);
+    }
 }
