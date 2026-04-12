@@ -19,7 +19,9 @@ public interface AdminAuthApi {
     @ApiErrorExceptions(AdminErrorCode.class)
     ResponseEntity<ApiResponse<Void>> login(AdminLoginRequest request, HttpServletResponse response);
 
-    @Operation(summary = "관리자 로그아웃", description = "어드민 토큰을 블랙리스트에 등록하고 쿠키를 만료시킵니다.")
+    @Operation(
+            summary = "관리자 로그아웃",
+            description = "어드민 토큰을 블랙리스트에 등록하고 쿠키를 만료시킵니다. (토큰이 없거나 이미 만료된 경우 별도 처리 없이 200 OK를 반환합니다.)")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "관리자 로그아웃 성공")
     @ApiErrorExceptions(AdminErrorCode.class)
     ResponseEntity<ApiResponse<Void>> logout(

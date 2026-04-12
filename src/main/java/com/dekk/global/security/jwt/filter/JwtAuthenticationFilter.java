@@ -2,7 +2,6 @@ package com.dekk.global.security.jwt.filter;
 
 import com.dekk.app.admin.domain.exception.AdminBusinessException;
 import com.dekk.app.admin.domain.exception.AdminErrorCode;
-import com.dekk.app.admin.domain.repository.AdminTokenBlackListRepository;
 import com.dekk.app.admin.security.AdminUserDetails;
 import com.dekk.app.auth.domain.exception.AuthBusinessException;
 import com.dekk.app.auth.domain.exception.AuthErrorCode;
@@ -10,6 +9,7 @@ import com.dekk.global.error.BusinessException;
 import com.dekk.global.error.ErrorCode;
 import com.dekk.global.error.ErrorResponse;
 import com.dekk.global.security.jwt.JwtTokenProvider;
+import com.dekk.global.security.jwt.TokenBlacklistManager;
 import com.dekk.global.security.util.CookieUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -49,15 +49,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
-    private final AdminTokenBlackListRepository adminTokenBlackListRepository;
+    private final TokenBlacklistManager tokenBlacklistManager;
 
     public JwtAuthenticationFilter(
-            JwtTokenProvider jwtTokenProvider,
-            ObjectMapper objectMapper,
-            AdminTokenBlackListRepository adminTokenBlackListRepository) {
+            JwtTokenProvider jwtTokenProvider, ObjectMapper objectMapper, TokenBlacklistManager tokenBlacklistManager) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.objectMapper = objectMapper;
-        this.adminTokenBlackListRepository = adminTokenBlackListRepository;
+        this.tokenBlacklistManager = tokenBlacklistManager;
     }
 
     @Override
@@ -99,7 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
 
                 if (authentication.getPrincipal() instanceof AdminUserDetails) {
-                    if (adminTokenBlackListRepository.isBlackListed(jwt)) {
+                    if (tokenBlacklistManager.isBlacklisted(jwt)) {
                         throw new AdminBusinessException(AdminErrorCode.BLACKLISTED_TOKEN);
                     }
                 }

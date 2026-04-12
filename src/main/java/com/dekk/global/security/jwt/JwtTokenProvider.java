@@ -17,6 +17,7 @@ import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Collection;
 import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +25,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -138,6 +140,7 @@ public class JwtTokenProvider {
             long now = new Date().getTime();
             return Math.max(0, (expiration - now) / 1000);
         } catch (Exception e) {
+            log.debug("토큰 남은 수명 계산 실패 (이미 만료되거나 손상됨): {}", e.getMessage());
             return 0;
         }
     }
