@@ -13,15 +13,11 @@ public class S3Config {
 
     @Bean
     public S3Client s3Client(StorageProperties properties) {
-        return S3Client.builder()
-                .region(Region.of(properties.getRegion()))
-                .build();
+        return S3Client.builder().region(Region.of(properties.getRegion())).build();
     }
 
     @Bean
     public S3Presigner s3Presigner(StorageProperties properties) {
-        return S3Presigner.builder()
-                .region(Region.of(properties.getRegion()))
-                .build();
+        return S3Presigner.builder().region(Region.of(properties.getRegion())).build();
     }
 }
