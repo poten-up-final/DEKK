@@ -1,5 +1,6 @@
 package com.dekk.global.cache;
 
+import java.time.Duration;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -21,14 +22,18 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
-    @Value("${spring.data.redis.ssl.enabled}")
+    @Value("${spring.data.redis.ssl.enabled:false}")
     private boolean sslEnabled;
+
+    @Value("${spring.data.redis.timeout:500ms}")
+    private Duration timeout;
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration(host, port);
 
-        LettuceClientConfiguration.LettuceClientConfigurationBuilder builder = LettuceClientConfiguration.builder();
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder builder =
+                LettuceClientConfiguration.builder().commandTimeout(timeout);
 
         if (sslEnabled) {
             builder.useSsl();
@@ -51,7 +56,7 @@ public class RedisConfig {
     public RedissonClient redissonClient() {
         Config config = new Config();
         String prefix = sslEnabled ? "rediss://" : "redis://";
-        config.useSingleServer().setAddress(prefix + host + ":" + port);
+        config.useSingleServer().setAddress(prefix + host + ":" + port).setTimeout((int) timeout.toMillis());
 
         return Redisson.create(config);
     }

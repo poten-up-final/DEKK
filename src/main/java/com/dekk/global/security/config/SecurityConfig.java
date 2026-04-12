@@ -60,7 +60,9 @@ public class SecurityConfig {
                                 "/w/v2/cards",
                                 "/w/v1/auth/refresh",
                                 "/w/v1/decks/shared/*/cards",
-                                "/adm/v1/auth/login")
+                                "/adm/v1/auth/login",
+                                "/adm/v1/auth/logout",
+                                "/w/v1/auth/logout")
                         .permitAll()
                         .requestMatchers("/adm/v1/admins/**")
                         .hasRole("SUPER_ADMIN")

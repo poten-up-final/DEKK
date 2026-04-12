@@ -5,10 +5,11 @@ import com.dekk.app.admin.presentation.request.AdminLoginRequest;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.swagger.ApiErrorExceptions;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 
 @Tag(name = "관리자 인증 API", description = "관리자 인증 관련 API")
 public interface AdminAuthApi {
@@ -18,8 +19,12 @@ public interface AdminAuthApi {
     @ApiErrorExceptions(AdminErrorCode.class)
     ResponseEntity<ApiResponse<Void>> login(AdminLoginRequest request, HttpServletResponse response);
 
-    @Operation(summary = "관리자 로그아웃", description = "관리자 로그아웃 처리를 수행합니다. (클라이언트 단 토큰 삭제 필요)")
+    @Operation(
+            summary = "관리자 로그아웃",
+            description = "어드민 토큰을 블랙리스트에 등록하고 쿠키를 만료시킵니다. (토큰이 없거나 이미 만료된 경우 별도 처리 없이 200 OK를 반환합니다.)")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "관리자 로그아웃 성공")
     @ApiErrorExceptions(AdminErrorCode.class)
-    ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response);
+    ResponseEntity<ApiResponse<Void>> logout(
+            @Parameter(hidden = true) @CookieValue(value = "admin_access_token", required = false) String accessToken,
+            HttpServletResponse response);
 }

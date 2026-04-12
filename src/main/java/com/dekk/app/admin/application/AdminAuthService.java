@@ -6,6 +6,7 @@ import com.dekk.app.admin.domain.exception.AdminBusinessException;
 import com.dekk.app.admin.domain.exception.AdminErrorCode;
 import com.dekk.app.admin.domain.model.Admin;
 import com.dekk.app.admin.domain.repository.AdminRepository;
+import com.dekk.app.admin.domain.repository.AdminTokenBlackListRepository;
 import com.dekk.app.admin.security.AdminUserDetails;
 import com.dekk.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +24,9 @@ public class AdminAuthService {
     private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AdminTokenBlackListRepository adminTokenBlackListRepository;
 
     public AdminLoginResult login(AdminLoginCommand command) {
-
         Admin admin = adminRepository
                 .findByEmail(command.email())
                 .orElseThrow(() -> new AdminBusinessException(AdminErrorCode.ADMIN_NOT_FOUND));
@@ -44,7 +45,14 @@ public class AdminAuthService {
         return new AdminLoginResult(accessToken);
     }
 
-    public void logout() {
-        // TODO: BlackList 도입 예정
+    public void logout(String accessToken) {
+        if (accessToken == null || accessToken.isBlank()) {
+            return;
+        }
+
+        long ttlSeconds = jwtTokenProvider.getRemainingExpiration(accessToken);
+        if (ttlSeconds > 0) {
+            adminTokenBlackListRepository.save(accessToken, ttlSeconds);
+        }
     }
 }
