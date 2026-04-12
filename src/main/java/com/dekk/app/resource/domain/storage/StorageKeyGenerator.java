@@ -11,8 +11,7 @@ import java.util.UUID;
 public class StorageKeyGenerator {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
-    private static final Set<String> ALLOWED_EXTENSIONS =
-            Set.of(".jpg", ".jpeg", ".png", ".webp", ".gif");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".webp", ".gif");
 
     public static String generateKey(ResourceType resourceType, String originalFileName) {
         if (resourceType == null) {
