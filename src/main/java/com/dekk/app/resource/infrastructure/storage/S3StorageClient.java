@@ -1,6 +1,7 @@
 package com.dekk.app.resource.infrastructure.storage;
 
-import com.dekk.app.resource.infrastructure.dto.PresignedUploadUrl;
+import com.dekk.app.resource.domain.dto.PresignedUploadUrl;
+import com.dekk.app.resource.domain.storage.StorageClient;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
