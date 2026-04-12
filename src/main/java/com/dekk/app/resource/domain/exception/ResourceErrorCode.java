@@ -16,6 +16,10 @@ public enum ResourceErrorCode implements ErrorCode {
     FILE_EXTENSION_IS_REQUIRED(HttpStatus.BAD_REQUEST, "ER40010", "파일 확장자는 필수입니다."),
     UNSUPPORTED_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "ER40011", "지원하지 않는 파일 확장자입니다."),
 
+    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "ER40401", "리소스를 찾을 수 없습니다."),
+    STORAGE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "ER40301", "스토리지 접근 권한이 없습니다."),
+    STORAGE_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ER50001", "스토리지 서비스 오류가 발생했습니다."),
+
     INVALID_STATUS_CHANGE(HttpStatus.CONFLICT, "ER40901", "현재 상태에서는 상태 변경이 불가능합니다.");
 
     private final HttpStatus httpStatus;
