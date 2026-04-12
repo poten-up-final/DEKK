@@ -60,7 +60,3 @@ jwt:
   access-token-validity-in-seconds: 3600
   refresh-token-validity-in-seconds: 604800
   admin-access-token-validity-in-seconds: 3600
-
-worker:
-  n8n:
-    webhook-url: "http://dummy-n8n-url/webhook"

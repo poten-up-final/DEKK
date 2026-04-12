@@ -35,7 +35,7 @@ public class RecommendQueryController implements RecommendQueryApi {
 
         if (userId == null) {
             SliceResponse<GuestCardResponse> result = SliceResponse.from(
-                    recommendQueryService.getGuestCards(pageable).map(GuestCardResponse::from));
+                    recommendQueryService.getGuestCards(pageable, startCardId).map(GuestCardResponse::from));
             return ResponseEntity.ok(ApiResponse.of(RecommendResultCode.GUEST_RECOMMEND_CARD_SUCCESS, result));
         }
 

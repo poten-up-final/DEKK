@@ -23,20 +23,6 @@ services:
     volumes:
       - redis_data:/data
 
-  n8n:
-    image: n8nio/n8n:latest
-    container_name: dekk-n8n
-    restart: always
-    ports:
-      - "5678:5678"
-    environment:
-      - GENERIC_TIMEZONE=Asia/Seoul
-      - TZ=Asia/Seoul
-    volumes:
-      - n8n_data:/home/node/.n8n
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
   prometheus:
     image: prom/prometheus:v2.53.0
     container_name: dekk-prometheus
@@ -84,7 +70,6 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  n8n_data:
   prometheus-data:
   loki-data:
   grafana-data:

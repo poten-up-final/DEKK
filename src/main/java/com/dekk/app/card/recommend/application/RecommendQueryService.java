@@ -45,8 +45,28 @@ public class RecommendQueryService {
         return getRecommendCards(userId, pageable, null);
     }
 
-    public Slice<GuestCardResult> getGuestCards(Pageable pageable) {
-        return cardQueryService.getCardsForGuestRandom(pageable);
+    public Slice<GuestCardResult> getGuestCards(Pageable pageable, UUID startCardId) {
+        Slice<GuestCardResult> randomCards = cardQueryService.getCardsForGuestRandom(pageable);
+
+        if (startCardId == null) {
+            return randomCards;
+        }
+
+        Optional<GuestCardResult> startCard = cardQueryService.findByPublicIdForGuest(startCardId);
+        if (startCard.isEmpty()) {
+            return randomCards;
+        }
+
+        GuestCardResult card = startCard.get();
+        List<GuestCardResult> merged = new ArrayList<>(randomCards.getContent().size() + 1);
+        merged.add(card);
+        randomCards.getContent().stream()
+                .filter(r -> !r.publicId().equals(startCardId))
+                .forEach(merged::add);
+
+        List<GuestCardResult> content =
+                merged.stream().limit(pageable.getPageSize()).toList();
+        return new SliceImpl<>(content, pageable, randomCards.hasNext());
     }
 
     public Slice<RecommendCardResult> getRecommendCards(Long userId, Pageable pageable, UUID startCardId) {
