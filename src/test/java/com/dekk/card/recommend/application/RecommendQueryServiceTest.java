@@ -10,6 +10,7 @@ import com.dekk.app.activelog.application.ActiveLogQueryService;
 import com.dekk.app.activelog.domain.model.SwipeType;
 import com.dekk.app.card.application.CardCategoryQueryService;
 import com.dekk.app.card.application.CardQueryService;
+import com.dekk.app.card.application.dto.result.GuestCardResult;
 import com.dekk.app.card.application.dto.result.MemberCardResult;
 import com.dekk.app.card.domain.model.Card;
 import com.dekk.app.card.domain.model.CardImage;
@@ -22,6 +23,7 @@ import com.dekk.app.user.domain.model.enums.Gender;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,6 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.SliceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class RecommendQueryServiceTest {
@@ -293,6 +296,111 @@ class RecommendQueryServiceTest {
                     recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
 
             assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("비회원 SEO startCardId 처리")
+    class GuestStartCard {
+
+        private final UUID START_UUID = UUID.randomUUID();
+        private final PageRequest PAGE = PageRequest.of(0, 10);
+
+        @Test
+        @DisplayName("startCardId가 존재하면 해당 카드가 첫 번째로 온다")
+        void shouldPrependStartCard_whenStartCardExists() {
+            GuestCardResult startCard = guestCard(START_UUID, "http://start.jpg");
+            GuestCardResult other1 = guestCard(UUID.randomUUID(), "http://other1.jpg");
+            GuestCardResult other2 = guestCard(UUID.randomUUID(), "http://other2.jpg");
+
+            given(cardQueryService.getCardsForGuestRandom(PAGE))
+                    .willReturn(new SliceImpl<>(List.of(other1, other2), PAGE, false));
+            given(cardQueryService.findByPublicIdForGuest(START_UUID))
+                    .willReturn(Optional.of(startCard));
+
+            List<GuestCardResult> result = recommendQueryService.getGuestCards(PAGE, START_UUID).getContent();
+
+            assertThat(result.getFirst().publicId()).isEqualTo(START_UUID);
+        }
+
+        @Test
+        @DisplayName("startCardId가 랜덤 목록에 이미 있으면 중복 없이 첫 번째로 온다")
+        void shouldNotDuplicate_whenStartCardAlreadyInRandomList() {
+            GuestCardResult startCard = guestCard(START_UUID, "http://start.jpg");
+            GuestCardResult other = guestCard(UUID.randomUUID(), "http://other.jpg");
+
+            given(cardQueryService.getCardsForGuestRandom(PAGE))
+                    .willReturn(new SliceImpl<>(List.of(startCard, other), PAGE, false));
+            given(cardQueryService.findByPublicIdForGuest(START_UUID))
+                    .willReturn(Optional.of(startCard));
+
+            List<GuestCardResult> result = recommendQueryService.getGuestCards(PAGE, START_UUID).getContent();
+
+            long count = result.stream().filter(r -> r.publicId().equals(START_UUID)).count();
+            assertThat(count).isEqualTo(1);
+            assertThat(result.getFirst().publicId()).isEqualTo(START_UUID);
+        }
+
+        @Test
+        @DisplayName("startCardId에 해당하는 카드가 없으면 랜덤 목록 그대로 반환한다")
+        void shouldReturnRandomList_whenStartCardNotFound() {
+            GuestCardResult other = guestCard(UUID.randomUUID(), "http://other.jpg");
+
+            given(cardQueryService.getCardsForGuestRandom(PAGE))
+                    .willReturn(new SliceImpl<>(List.of(other), PAGE, false));
+            given(cardQueryService.findByPublicIdForGuest(START_UUID))
+                    .willReturn(Optional.empty());
+
+            List<GuestCardResult> result = recommendQueryService.getGuestCards(PAGE, START_UUID).getContent();
+
+            assertThat(result).hasSize(1);
+            assertThat(result.getFirst().publicId()).isNotEqualTo(START_UUID);
+        }
+
+        @Test
+        @DisplayName("startCardId가 null이면 랜덤 목록 그대로 반환한다")
+        void shouldReturnRandomList_whenStartCardIdIsNull() {
+            GuestCardResult card = guestCard(UUID.randomUUID(), "http://card.jpg");
+
+            given(cardQueryService.getCardsForGuestRandom(PAGE))
+                    .willReturn(new SliceImpl<>(List.of(card), PAGE, false));
+
+            List<GuestCardResult> result = recommendQueryService.getGuestCards(PAGE, null).getContent();
+
+            assertThat(result).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("결과가 pageSize를 초과하지 않는다")
+        void shouldNotExceedPageSize_whenStartCardPrepended() {
+            UUID otherUuid = UUID.randomUUID();
+            GuestCardResult startCard = guestCard(START_UUID, "http://start.jpg");
+            List<GuestCardResult> tenOthers = List.of(
+                    guestCard(otherUuid, "http://1.jpg"),
+                    guestCard(UUID.randomUUID(), "http://2.jpg"),
+                    guestCard(UUID.randomUUID(), "http://3.jpg"),
+                    guestCard(UUID.randomUUID(), "http://4.jpg"),
+                    guestCard(UUID.randomUUID(), "http://5.jpg"),
+                    guestCard(UUID.randomUUID(), "http://6.jpg"),
+                    guestCard(UUID.randomUUID(), "http://7.jpg"),
+                    guestCard(UUID.randomUUID(), "http://8.jpg"),
+                    guestCard(UUID.randomUUID(), "http://9.jpg"),
+                    guestCard(UUID.randomUUID(), "http://10.jpg")
+            );
+
+            given(cardQueryService.getCardsForGuestRandom(PAGE))
+                    .willReturn(new SliceImpl<>(tenOthers, PAGE, false));
+            given(cardQueryService.findByPublicIdForGuest(START_UUID))
+                    .willReturn(Optional.of(startCard));
+
+            List<GuestCardResult> result = recommendQueryService.getGuestCards(PAGE, START_UUID).getContent();
+
+            assertThat(result).hasSize(PAGE.getPageSize());
+            assertThat(result.getFirst().publicId()).isEqualTo(START_UUID);
+        }
+
+        private GuestCardResult guestCard(UUID publicId, String imageUrl) {
+            return new GuestCardResult(publicId, imageUrl, null, null, List.of());
         }
     }
 
