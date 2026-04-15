@@ -41,4 +41,6 @@ public interface CardRepository {
     List<Card> findLatestApprovedCardsExcluding(Set<Long> excludeCardIds, int size);
 
     Optional<Card> findByPublicId(UUID publicId);
+
+    Optional<Long> findIdByPublicId(UUID publicId);
 }
