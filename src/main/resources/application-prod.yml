@@ -81,6 +81,12 @@ app:
     domain: ${APP_COOKIE_DOMAIN}
     secure: true
 
+storage:
+  region: ${AWS_S3_REGION}
+  bucket: ${AWS_S3_RESOURCE_BUCKET}
+  presigned-url-expiration: 5m
+  cdn-base-url: ${CDN_BASE_URL}
+
 loki:
   host: ${LOKI_HOST}
 

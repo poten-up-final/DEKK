@@ -50,9 +50,6 @@ public record AdminCardDetailResponse(
             @Schema(description = "상품명", example = "에어맥스 90")
             String name,
 
-            @Schema(description = "가격", example = "129000") Integer price,
-            @Schema(description = "옵션", example = "L") String option,
-            @Schema(description = "유사 상품 여부") boolean isSimilar,
             @Schema(description = "상품 URL") String productUrl,
             @Schema(description = "활성 여부") boolean isActive,
             @Schema(description = "상품 이미지") ProductImageResponse productImage) {
@@ -64,9 +61,6 @@ public record AdminCardDetailResponse(
                     detail.productId(),
                     detail.brand(),
                     detail.name(),
-                    detail.price(),
-                    detail.option(),
-                    detail.isSimilar(),
                     detail.productUrl(),
                     detail.isActive(),
                     imageResponse);

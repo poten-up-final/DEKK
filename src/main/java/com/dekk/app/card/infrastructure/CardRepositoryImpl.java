@@ -122,4 +122,9 @@ public class CardRepositoryImpl implements CardRepository {
     public Optional<Card> findByPublicId(UUID publicId) {
         return cardJpaRepository.findByPublicIdWithProducts(publicId);
     }
+
+    @Override
+    public Optional<Long> findIdByPublicId(UUID publicId) {
+        return cardJpaRepository.findIdByPublicId(publicId);
+    }
 }

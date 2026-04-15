@@ -7,6 +7,7 @@ import com.dekk.app.activelog.presentation.response.ActiveLogResultCode;
 import com.dekk.global.response.ApiResponse;
 import com.dekk.global.security.annotation.LoginUser;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,11 +22,12 @@ public class ActiveLogController implements ActiveLogApi {
     private final ActiveLogCommandService activeLogCommandService;
 
     @Override
-    @PostMapping("/w/v1/cards/{cardId}/swipe")
+    @PostMapping("/w/v1/cards/{publicId}/swipe")
     public ResponseEntity<ApiResponse<Void>> swipeCard(
-            @PathVariable("cardId") Long cardId, @Valid @RequestBody SwipeRequest request, @LoginUser Long userId) {
-
-        SwipeCommand command = new SwipeCommand(userId, cardId, request.swipeType());
+            @PathVariable(name = "publicId") UUID publicId,
+            @Valid @RequestBody SwipeRequest request,
+            @LoginUser Long userId) {
+        SwipeCommand command = new SwipeCommand(userId, publicId, request.swipeType());
         activeLogCommandService.saveSwipeAction(command);
 
         return ResponseEntity.ok(ApiResponse.from(ActiveLogResultCode.SWIPE_SUCCESS));
