@@ -85,10 +85,10 @@ app:
     secure: true
 
 storage:
-  region: ${AWS_S3_REGION}
-  bucket: ${AWS_S3_RESOURCE_BUCKET}
+  region: ${DEV_AWS_S3_REGION}
+  bucket: ${DEV_AWS_S3_RESOURCE_BUCKET}
   presigned-url-expiration: 5m
-  cdn-base-url: ${CDN_BASE_URL}
+  cdn-base-url: ${DEV_CDN_BASE_URL}
 
 loki:
   host: ${DEV_LOKI_HOST}
