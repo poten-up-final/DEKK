@@ -39,9 +39,6 @@ public record AdminCardDetailResult(
             Long productId,
             String brand,
             String name,
-            Integer price,
-            String option,
-            boolean isSimilar,
             String productUrl,
             boolean isActive,
             ProductImageDetail productImage) {
@@ -53,9 +50,6 @@ public record AdminCardDetailResult(
                     product.getId(),
                     product.getBrand(),
                     product.getName(),
-                    product.getPrice(),
-                    product.getOption(),
-                    product.isSimilar(),
                     product.getProductUrl(),
                     product.isActive(),
                     imageDetail);

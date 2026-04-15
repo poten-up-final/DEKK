@@ -41,7 +41,7 @@ public interface CardCommandApi {
                                         mediaType = MediaType.APPLICATION_JSON_VALUE,
                                         examples = @ExampleObject(value = """
                                     {
-                                      "code": "EC40009",
+                                      "code": "EC40006",
                                       "message": "삭제 요청된 카드의 상태는 변경할 수 없습니다"
                                     }"""))),
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -81,7 +81,7 @@ public interface CardCommandApi {
                                         mediaType = MediaType.APPLICATION_JSON_VALUE,
                                         examples = @ExampleObject(value = """
                                     {
-                                      "code": "EC40009",
+                                      "code": "EC40006",
                                       "message": "삭제 요청된 카드의 상태는 변경할 수 없습니다"
                                     }"""))),
                 @io.swagger.v3.oas.annotations.responses.ApiResponse(
