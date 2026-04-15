@@ -44,6 +44,13 @@ jobs:
           
           echo "DEV_LOKI_HOST=${{ secrets.DEV_LOKI_HOST }}" >> .env
           echo "DEV_PROMETHEUS_PORT=${{ secrets.DEV_PROMETHEUS_PORT }}" >> .env
+          
+          echo "DEV_AWS_S3_REGION=${{ secrets.DEV_AWS_S3_REGION }}" >> .env
+          echo "DEV_AWS_S3_RESOURCE_BUCKET=${{ secrets.DEV_AWS_S3_RESOURCE_BUCKET }}" >> .env
+          echo "DEV_AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }}" >> .env
+          echo "DEV_AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> .env
+          echo "DEV_AWS_REGION=${{ secrets.DEV_AWS_REGION }}" >> .env
+          echo "DEV_CDN_BASE_URL=${{ secrets.DEV_CDN_BASE_URL }}" >> .env
 
       - name: 4. Spring Boot 빌드 (테스트 제외)
         run: |
