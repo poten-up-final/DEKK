@@ -36,6 +36,23 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_APP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
   security:
     oauth2:
       client:
@@ -69,6 +86,7 @@ jwt:
   access-token-validity-in-seconds: ${JWT_ACCESS_TOKEN_EXPIRATION}
   refresh-token-validity-in-seconds: ${JWT_REFRESH_TOKEN_EXPIRATION}
   admin-access-token-validity-in-seconds: ${JWT_ADMIN_TOKEN_EXPIRATION}
+  admin-refresh-token-validity-in-seconds: ${JWT_ADMIN_REFRESH_TOKEN_EXPIRATION}
 
 app:
   oauth2:

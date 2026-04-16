@@ -60,6 +60,7 @@ jwt:
   access-token-validity-in-seconds: 3600
   refresh-token-validity-in-seconds: 604800
   admin-access-token-validity-in-seconds: 3600
+  admin-refresh-token-validity-in-seconds: 1209600
 
 storage:
   region: ap-northeast-2
