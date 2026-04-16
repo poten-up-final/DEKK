@@ -28,11 +28,10 @@ public class AdminEmailService {
 
             String inviteUrl = "https://space.dekk.co.kr/signup?token=" + inviteToken;
 
-            message.setText("안녕하세요.\n\n" +
-                "DEKK 백오피스 관리자로 초대되었습니다.\n" +
-                "아래 링크를 클릭하여 비밀번호 및 소속을 입력하고 가입을 완료해 주세요.\n\n" +
-                inviteUrl + "\n\n" +
-                "※ 본 링크는 24시간 동안만 유효합니다.");
+            message.setText("안녕하세요.\n\n" + "DEKK 백오피스 관리자로 초대되었습니다.\n"
+                    + "아래 링크를 클릭하여 비밀번호 및 소속을 입력하고 가입을 완료해 주세요.\n\n"
+                    + inviteUrl
+                    + "\n\n" + "※ 본 링크는 24시간 동안만 유효합니다.");
 
             mailSender.send(message);
             log.info("[AdminEmailService] 초대 메일 발송 완료. To: {}", toEmail);

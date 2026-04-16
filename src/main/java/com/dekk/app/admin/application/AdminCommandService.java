@@ -9,10 +9,8 @@ import com.dekk.app.admin.domain.model.AdminRole;
 import com.dekk.app.admin.domain.repository.AdminRefreshTokenRepository;
 import com.dekk.app.admin.domain.repository.AdminRepository;
 import com.dekk.app.admin.domain.repository.AdminTokenBlackListRepository;
-
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +43,8 @@ public class AdminCommandService {
         }
 
         String token = UUID.randomUUID().toString().replace("-", "");
-        String payload = String.format("%s:%s:%d", command.email(), command.role().name(), inviterId);
+        String payload =
+                String.format("%s:%s:%d", command.email(), command.role().name(), inviterId);
 
         redisTemplate.opsForValue().set(INVITE_PREFIX + token, payload, 24, TimeUnit.HOURS);
 
@@ -54,7 +53,6 @@ public class AdminCommandService {
         log.info("[Audit] 관리자 초대 토큰 발행. InviterId: {}, Email: {}, IP: {}", inviterId, command.email(), clientIp);
         log.info("[테스트용 임시 토큰 발급] Token: {}", token);
     }
-
 
     public void completeSignup(AdminSignupCommand command, String clientIp) {
         String data = redisTemplate.opsForValue().get(INVITE_PREFIX + command.token());
@@ -75,8 +73,8 @@ public class AdminCommandService {
 
     public void suspendAdmin(Long suspenderId, Long targetId, String clientIp) {
         Admin admin = adminRepository
-            .findById(targetId)
-            .orElseThrow(() -> new AdminBusinessException(AdminErrorCode.ADMIN_NOT_FOUND));
+                .findById(targetId)
+                .orElseThrow(() -> new AdminBusinessException(AdminErrorCode.ADMIN_NOT_FOUND));
 
         admin.suspend();
         adminRefreshTokenRepository.deleteByAdminId(targetId);
