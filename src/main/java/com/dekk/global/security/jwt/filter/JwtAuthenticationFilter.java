@@ -17,8 +17,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Arrays;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -51,12 +53,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
-    private final AdminTokenBlackListRepository adminTokenBlackListRepository; // 👈 TokenBlacklistManager 대체
+    private final AdminTokenBlackListRepository adminTokenBlackListRepository;
 
     public JwtAuthenticationFilter(
-            JwtTokenProvider jwtTokenProvider,
-            ObjectMapper objectMapper,
-            AdminTokenBlackListRepository adminTokenBlackListRepository) {
+        JwtTokenProvider jwtTokenProvider,
+        ObjectMapper objectMapper,
+        AdminTokenBlackListRepository adminTokenBlackListRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.objectMapper = objectMapper;
         this.adminTokenBlackListRepository = adminTokenBlackListRepository;
@@ -75,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
         String requestUri = request.getRequestURI();
         String jwt = null;
@@ -124,10 +126,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             return Arrays.stream(cookies)
-                    .filter(cookie -> targetCookieName.equals(cookie.getName()))
-                    .map(Cookie::getValue)
-                    .findFirst()
-                    .orElse(null);
+                .filter(cookie -> targetCookieName.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
         }
         return null;
     }
