@@ -35,7 +35,6 @@ spring:
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
 
-  # 👇 CI 빌드 에러를 막기 위해 추가된 가짜 메일 설정입니다!
   mail:
     host: localhost
     port: 587
