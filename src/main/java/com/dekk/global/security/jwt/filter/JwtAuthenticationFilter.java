@@ -2,6 +2,7 @@ package com.dekk.global.security.jwt.filter;
 
 import com.dekk.app.admin.domain.exception.AdminBusinessException;
 import com.dekk.app.admin.domain.exception.AdminErrorCode;
+import com.dekk.app.admin.domain.repository.AdminTokenBlackListRepository;
 import com.dekk.app.admin.security.AdminUserDetails;
 import com.dekk.app.auth.domain.exception.AuthBusinessException;
 import com.dekk.app.auth.domain.exception.AuthErrorCode;
@@ -9,7 +10,6 @@ import com.dekk.global.error.BusinessException;
 import com.dekk.global.error.ErrorCode;
 import com.dekk.global.error.ErrorResponse;
 import com.dekk.global.security.jwt.JwtTokenProvider;
-import com.dekk.global.security.jwt.TokenBlacklistManager;
 import com.dekk.global.security.util.CookieUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -17,8 +17,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Arrays;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +30,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -49,13 +53,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
-    private final TokenBlacklistManager tokenBlacklistManager;
+    private final AdminTokenBlackListRepository adminTokenBlackListRepository; // 👈 TokenBlacklistManager 대체
 
     public JwtAuthenticationFilter(
-            JwtTokenProvider jwtTokenProvider, ObjectMapper objectMapper, TokenBlacklistManager tokenBlacklistManager) {
+        JwtTokenProvider jwtTokenProvider,
+        ObjectMapper objectMapper,
+        AdminTokenBlackListRepository adminTokenBlackListRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.objectMapper = objectMapper;
-        this.tokenBlacklistManager = tokenBlacklistManager;
+        this.adminTokenBlackListRepository = adminTokenBlackListRepository;
     }
 
     @Override
@@ -71,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
         String requestUri = request.getRequestURI();
         String jwt = null;
@@ -96,8 +102,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
 
-                if (authentication.getPrincipal() instanceof AdminUserDetails) {
-                    if (tokenBlacklistManager.isBlacklisted(jwt)) {
+                if (authentication.getPrincipal() instanceof AdminUserDetails admin) {
+                    if (adminTokenBlackListRepository.isKickedOut(admin.adminId())) {
+                        log.warn("[Security Alert] Kick-out 대상 접근 차단: {}", admin.adminId());
+                        throw new AdminBusinessException(AdminErrorCode.ACCOUNT_SUSPENDED);
+                    }
+                    if (adminTokenBlackListRepository.isBlacklisted(jwt)) {
                         throw new AdminBusinessException(AdminErrorCode.BLACKLISTED_TOKEN);
                     }
                 }
@@ -116,10 +126,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             return Arrays.stream(cookies)
-                    .filter(cookie -> targetCookieName.equals(cookie.getName()))
-                    .map(Cookie::getValue)
-                    .findFirst()
-                    .orElse(null);
+                .filter(cookie -> targetCookieName.equals(cookie.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
         }
         return null;
     }
