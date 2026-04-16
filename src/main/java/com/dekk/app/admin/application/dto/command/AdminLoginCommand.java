@@ -1,3 +1,3 @@
 package com.dekk.app.admin.application.dto.command;
 
-public record AdminLoginCommand(String email, String password) {}
+public record AdminLoginCommand(String email, String password, String ip) {}
