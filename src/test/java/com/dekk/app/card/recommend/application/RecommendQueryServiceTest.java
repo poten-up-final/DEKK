@@ -7,7 +7,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import com.dekk.app.activelog.application.ActiveLogQueryService;
-import com.dekk.app.activelog.domain.model.SwipeType;
+import com.dekk.app.activelog.domain.model.SwipedCards;
 import com.dekk.app.card.application.CardCategoryQueryService;
 import com.dekk.app.card.application.CardQueryService;
 import com.dekk.app.card.application.dto.result.GuestCardResult;
@@ -44,16 +44,11 @@ class RecommendQueryServiceTest {
     private static final Long USER_ID = 1L;
     private static final int SIZE = 10;
 
-    @Mock
-    private CardQueryService cardQueryService;
-    @Mock
-    private UserQueryService userQueryService;
-    @Mock
-    private ActiveLogQueryService activeLogQueryService;
-    @Mock
-    private CardCategoryQueryService cardCategoryQueryService;
-    @Mock
-    private RecommendScoringService recommendScoringService;
+    @Mock private CardQueryService cardQueryService;
+    @Mock private UserQueryService userQueryService;
+    @Mock private ActiveLogQueryService activeLogQueryService;
+    @Mock private CardCategoryQueryService cardCategoryQueryService;
+    @Mock private RecommendScoringService recommendScoringService;
 
     @InjectMocks
     private RecommendQueryService recommendQueryService;
@@ -65,7 +60,7 @@ class RecommendQueryServiceTest {
         @BeforeEach
         void setUp() {
             given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(Gender.MALE, 175, 70));
-            given(activeLogQueryService.getSwipedCardIds(USER_ID, SwipeType.LIKE)).willReturn(List.of());
+            given(activeLogQueryService.getSwipedCards(USER_ID)).willReturn(SwipedCards.empty());
             given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
             given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
@@ -82,8 +77,8 @@ class RecommendQueryServiceTest {
 
             given(cardQueryService.getRecommendCandidates(any()))
                 .willReturn(List.of(card10, card20, card30));
-            given(activeLogQueryService.getAllSwipedCardIds(USER_ID))
-                .willReturn(Set.of(10L, 20L));
+            given(activeLogQueryService.getSwipedCards(USER_ID))
+                .willReturn(new SwipedCards(Set.of(10L, 20L), Set.of()));
 
             List<RecommendCardResult> result =
                 recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
@@ -101,8 +96,6 @@ class RecommendQueryServiceTest {
 
             given(cardQueryService.getRecommendCandidates(any()))
                 .willReturn(List.of(card1, card2));
-            given(activeLogQueryService.getAllSwipedCardIds(USER_ID))
-                .willReturn(Set.of());
 
             List<RecommendCardResult> result =
                 recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
@@ -118,8 +111,8 @@ class RecommendQueryServiceTest {
 
             given(cardQueryService.getRecommendCandidates(any()))
                 .willReturn(List.of(card1, card2));
-            given(activeLogQueryService.getAllSwipedCardIds(USER_ID))
-                .willReturn(Set.of(1L, 2L));
+            given(activeLogQueryService.getSwipedCards(USER_ID))
+                .willReturn(new SwipedCards(Set.of(1L, 2L), Set.of()));
 
             List<RecommendCardResult> result =
                 recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
@@ -135,8 +128,7 @@ class RecommendQueryServiceTest {
         @BeforeEach
         void setUp() {
             given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(Gender.MALE, 175, 70));
-            given(activeLogQueryService.getAllSwipedCardIds(USER_ID)).willReturn(Set.of());
-            given(activeLogQueryService.getSwipedCardIds(USER_ID, SwipeType.LIKE)).willReturn(List.of());
+            given(activeLogQueryService.getSwipedCards(USER_ID)).willReturn(SwipedCards.empty());
             given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
             given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
         }
@@ -161,8 +153,6 @@ class RecommendQueryServiceTest {
         @Test
         @DisplayName("추천 후보가 부족하면 일반 카드로 나머지를 채운다")
         void shouldFillWithNormalCards_whenRecommendInsufficient() {
-            // 추천 후보 3개뿐 → size=10 기준 추천 7개가 필요하지만 3개만 가능
-            // → 추천 3개 + 일반 7개로 보충
             List<Card> candidates = mockCards(1L, 2L, 3L);
             given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
@@ -201,7 +191,6 @@ class RecommendQueryServiceTest {
             given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
                 .willAnswer(inv -> inv.getArgument(2));
-            // 일반 카드 ID 100, 101은 추천 카드 ID와 겹치지 않음
             given(cardQueryService.getLatestCards(any(), anyInt()))
                 .willReturn(memberCards(100L, 101L));
 
@@ -226,8 +215,7 @@ class RecommendQueryServiceTest {
         @BeforeEach
         void setUp() {
             given(cardQueryService.getRecommendCandidates(any())).willReturn(List.of());
-            given(activeLogQueryService.getAllSwipedCardIds(USER_ID)).willReturn(Set.of());
-            given(activeLogQueryService.getSwipedCardIds(USER_ID, SwipeType.LIKE)).willReturn(List.of());
+            given(activeLogQueryService.getSwipedCards(USER_ID)).willReturn(SwipedCards.empty());
             given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
             given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
@@ -268,14 +256,13 @@ class RecommendQueryServiceTest {
         void setUp() {
             given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(Gender.MALE, 175, 70));
             given(cardQueryService.getRecommendCandidates(any())).willReturn(List.of());
-            given(activeLogQueryService.getAllSwipedCardIds(USER_ID)).willReturn(Set.of());
             given(cardQueryService.getLatestCards(any(), anyInt())).willReturn(List.of());
         }
 
         @Test
         @DisplayName("LIKE 이력이 없으면 빈 선호 맵으로 랭킹을 수행한다")
         void shouldRankWithEmptyPreferences_whenNoLikeHistory() {
-            given(activeLogQueryService.getSwipedCardIds(USER_ID, SwipeType.LIKE)).willReturn(List.of());
+            given(activeLogQueryService.getSwipedCards(USER_ID)).willReturn(SwipedCards.empty());
             given(cardCategoryQueryService.getCardCategoryMap(List.of())).willReturn(Map.of());
             given(recommendScoringService.calculateCategoryPreferenceRatios(List.of())).willReturn(Map.of());
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
@@ -290,10 +277,10 @@ class RecommendQueryServiceTest {
         @Test
         @DisplayName("LIKE한 카드에 카테고리 매핑이 없으면 빈 선호 맵으로 랭킹을 수행한다")
         void shouldRankWithEmptyPreferences_whenLikedCardsHaveNoCategories() {
-            given(activeLogQueryService.getSwipedCardIds(USER_ID, SwipeType.LIKE)).willReturn(List.of(10L, 20L));
-            given(cardCategoryQueryService.getCardCategoryMap(List.of(10L, 20L))).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(List.of())).willReturn(Map.of());
-            given(cardCategoryQueryService.getCardCategoryMap(List.of())).willReturn(Map.of());
+            given(activeLogQueryService.getSwipedCards(USER_ID))
+                .willReturn(new SwipedCards(Set.of(10L, 20L), Set.of()));
+            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
+            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
             given(recommendScoringService.rank(any(), any(), any(), any(), any()))
                 .willAnswer(inv -> inv.getArgument(2));
 
@@ -378,10 +365,9 @@ class RecommendQueryServiceTest {
         @Test
         @DisplayName("결과가 pageSize를 초과하지 않는다")
         void shouldNotExceedPageSize_whenStartCardPrepended() {
-            UUID otherUuid = UUID.randomUUID();
             GuestCardResult startCard = guestCard(START_UUID, "http://start.jpg");
             List<GuestCardResult> tenOthers = List.of(
-                    guestCard(otherUuid, "http://1.jpg"),
+                    guestCard(UUID.randomUUID(), "http://1.jpg"),
                     guestCard(UUID.randomUUID(), "http://2.jpg"),
                     guestCard(UUID.randomUUID(), "http://3.jpg"),
                     guestCard(UUID.randomUUID(), "http://4.jpg"),

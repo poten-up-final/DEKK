@@ -1,7 +1,7 @@
 package com.dekk.app.card.recommend.application;
 
 import com.dekk.app.activelog.application.ActiveLogQueryService;
-import com.dekk.app.activelog.domain.model.SwipeType;
+import com.dekk.app.activelog.domain.model.SwipedCards;
 import com.dekk.app.card.application.CardCategoryQueryService;
 import com.dekk.app.card.application.CardQueryService;
 import com.dekk.app.card.application.dto.query.RecommendCandidateQuery;
@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -77,7 +78,8 @@ public class RecommendQueryService {
             log.warn("[Recommend] 깊은 스크롤 감지 userId={} page={} - 컨텐츠 다양성 부족 가능성", userId, pageable.getPageNumber());
         }
 
-        Set<Long> swipedIds = activeLogQueryService.getAllSwipedCardIds(userId);
+        SwipedCards swiped = activeLogQueryService.getSwipedCards(userId);
+        Set<Long> swipedIds = swiped.allSwipedIds();
         log.debug(
                 "[Recommend] userId={} swipedCount={} totalNeeded={} recommendTarget={}",
                 userId,
@@ -85,7 +87,7 @@ public class RecommendQueryService {
                 totalNeeded,
                 recommendCount);
 
-        List<MemberCardResult> rankedCandidates = rankCandidates(userId, swipedIds);
+        List<MemberCardResult> rankedCandidates = rankCandidates(userId, swiped);
 
         if (rankedCandidates.size() < recommendCount) {
             log.warn(
@@ -145,10 +147,10 @@ public class RecommendQueryService {
 
     private List<RecommendCardResult> mergeRecommendResults(
             List<MemberCardResult> recommendCards, List<MemberCardResult> normalCards) {
-        List<RecommendCardResult> results = new ArrayList<>(recommendCards.size() + normalCards.size());
-        recommendCards.forEach(c -> results.add(RecommendCardResult.recommended(c)));
-        normalCards.forEach(c -> results.add(RecommendCardResult.normal(c)));
-        return results;
+        return Stream.concat(
+                        recommendCards.stream().map(RecommendCardResult::recommended),
+                        normalCards.stream().map(RecommendCardResult::normal))
+                .toList();
     }
 
     private Slice<RecommendCardResult> toSlice(
@@ -160,16 +162,16 @@ public class RecommendQueryService {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
-    private List<MemberCardResult> rankCandidates(Long userId, Set<Long> swipedIds) {
+    private List<MemberCardResult> rankCandidates(Long userId, SwipedCards swiped) {
         UserInfoResult userInfo = userQueryService.getMyInfo(userId);
         List<MemberCardResult> candidates = fetchCandidates(userInfo).stream()
-                .filter(card -> !swipedIds.contains(card.cardId()))
+                .filter(card -> !swiped.isAlreadySwiped(card.cardId()))
                 .toList();
 
         if (candidates.size() >= LARGE_CANDIDATE_THRESHOLD) {
             log.warn("[Recommend] 대용량 후보군 스코어링 userId={} candidateCount={} - 인메모리 부하 위험", userId, candidates.size());
         }
-        Map<Long, Double> preferences = buildCategoryPreferences(userId);
+        Map<Long, Double> preferences = buildCategoryPreferences(swiped.likedIds());
 
         if (preferences.isEmpty()) {
             log.info("[Recommend] cold-start userId={} (카테고리 선호 없음, 체형 기반으로만 추천)", userId);
@@ -187,8 +189,8 @@ public class RecommendQueryService {
                 userInfo.height(), userInfo.weight(), candidates, cardCategoryMap, preferences);
     }
 
-    private Map<Long, Double> buildCategoryPreferences(Long userId) {
-        List<Long> likedCategoryIds = getLikedCategoryIds(userId);
+    private Map<Long, Double> buildCategoryPreferences(Set<Long> likedIds) {
+        List<Long> likedCategoryIds = getLikedCategoryIds(likedIds);
         return recommendScoringService.calculateCategoryPreferenceRatios(likedCategoryIds);
     }
 
@@ -201,9 +203,11 @@ public class RecommendQueryService {
                 .toList();
     }
 
-    private List<Long> getLikedCategoryIds(Long userId) {
-        List<Long> likedCardIds = activeLogQueryService.getSwipedCardIds(userId, SwipeType.LIKE);
-        return cardCategoryQueryService.getCardCategoryMap(likedCardIds).values().stream()
+    private List<Long> getLikedCategoryIds(Set<Long> likedIds) {
+        if (likedIds.isEmpty()) {
+            return List.of();
+        }
+        return cardCategoryQueryService.getCardCategoryMap(new ArrayList<>(likedIds)).values().stream()
                 .flatMap(List::stream)
                 .toList();
     }
