@@ -4,14 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.dekk.app.activelog.application.ActiveLogQueryService;
 import com.dekk.app.activelog.domain.model.SwipeType;
+import com.dekk.app.activelog.domain.model.SwipedCards;
 import com.dekk.app.activelog.domain.repository.ActiveLogRepository;
+import com.dekk.app.activelog.domain.repository.CardSwipeProjection;
 
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,38 +31,41 @@ class ActiveLogQueryServiceTest {
     private ActiveLogQueryService activeLogQueryService;
 
     @Test
-    @DisplayName("전체 스와이프 목록 조회 시 중복이 제거된 Set 구조로 반환되어야 한다")
-    void getAllSwipedCardIds_ReturnSet() {
-
+    @DisplayName("1회 조회 후 SwipeType별로 분리된 SwipedCards를 반환한다")
+    void getSwipedCards_separatesBySwipeType() {
         Long userId = 1L;
-        List<Long> mockList = List.of(10L, 20L, 10L);
-        given(activeLogRepository.findCardIdsByUserIdAndSwipeTypes(eq(userId), anyList()))
-            .willReturn(mockList);
+        CardSwipeProjection p1 = projection(10L, SwipeType.LIKE);
+        CardSwipeProjection p2 = projection(20L, SwipeType.LIKE);
+        CardSwipeProjection p3 = projection(30L, SwipeType.DISLIKE);
+        given(activeLogRepository.findCardIdAndSwipeTypeByUserId(eq(userId), anyList()))
+            .willReturn(List.of(p1, p2, p3));
 
-        Set<Long> result = activeLogQueryService.getAllSwipedCardIds(userId);
+        SwipedCards result = activeLogQueryService.getSwipedCards(userId);
 
-        assertThat(result).isInstanceOf(Set.class);
-        assertThat(result).hasSize(2);
-        assertThat(result).containsExactlyInAnyOrder(10L, 20L);
-        verify(activeLogRepository).findCardIdsByUserIdAndSwipeTypes(eq(userId), anyList());
+        assertThat(result.likedIds()).containsExactlyInAnyOrder(10L, 20L);
+        assertThat(result.dislikedIds()).containsExactlyInAnyOrder(30L);
+        assertThat(result.allSwipedIds()).containsExactlyInAnyOrder(10L, 20L, 30L);
+        verify(activeLogRepository).findCardIdAndSwipeTypeByUserId(eq(userId), anyList());
     }
 
     @Test
-    @DisplayName("특정 타입 조회 시 내부적으로 IN 절 메서드를 호출하여 리스트를 반환한다")
-    void getSwipedCardIds_ReturnList() {
-
+    @DisplayName("스와이프 이력이 없으면 빈 SwipedCards를 반환한다")
+    void getSwipedCards_returnsEmpty_whenNoHistory() {
         Long userId = 1L;
-        SwipeType type = SwipeType.LIKE;
-        List<Long> mockList = List.of(10L, 20L);
+        given(activeLogRepository.findCardIdAndSwipeTypeByUserId(eq(userId), anyList()))
+            .willReturn(List.of());
 
-        given(activeLogRepository.findCardIdsByUserIdAndSwipeTypes(userId, List.of(type)))
-            .willReturn(mockList);
+        SwipedCards result = activeLogQueryService.getSwipedCards(userId);
 
-        List<Long> result = activeLogQueryService.getSwipedCardIds(userId, type);
+        assertThat(result.likedIds()).isEmpty();
+        assertThat(result.dislikedIds()).isEmpty();
+        assertThat(result.allSwipedIds()).isEmpty();
+    }
 
-        assertThat(result).hasSize(2);
-        assertThat(result).isEqualTo(mockList);
-
-        verify(activeLogRepository).findCardIdsByUserIdAndSwipeTypes(userId, List.of(type));
+    private CardSwipeProjection projection(Long cardId, SwipeType swipeType) {
+        CardSwipeProjection p = mock(CardSwipeProjection.class);
+        given(p.getCardId()).willReturn(cardId);
+        given(p.getSwipeType()).willReturn(swipeType);
+        return p;
     }
 }
