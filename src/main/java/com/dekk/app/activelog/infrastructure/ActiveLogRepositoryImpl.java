@@ -3,9 +3,9 @@ package com.dekk.app.activelog.infrastructure;
 import com.dekk.app.activelog.domain.model.ActiveLog;
 import com.dekk.app.activelog.domain.model.SwipeType;
 import com.dekk.app.activelog.domain.repository.ActiveLogRepository;
+import com.dekk.app.activelog.domain.repository.CardSwipeProjection;
 import com.dekk.app.activelog.infrastructure.jpa.ActiveLogJpaRepository;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -26,17 +26,7 @@ public class ActiveLogRepositoryImpl implements ActiveLogRepository {
     }
 
     @Override
-    public Optional<ActiveLog> findByUserIdAndCardId(Long userId, Long cardId) {
-        return jpaRepository.findByUserIdAndCardId(userId, cardId);
-    }
-
-    @Override
-    public void delete(ActiveLog activeLog) {
-        jpaRepository.delete(activeLog);
-    }
-
-    @Override
-    public List<Long> findCardIdsByUserIdAndSwipeTypes(Long userId, List<SwipeType> swipeTypes) {
-        return jpaRepository.findCardIdsByUserIdAndSwipeTypes(userId, swipeTypes);
+    public List<CardSwipeProjection> findCardIdAndSwipeTypeByUserId(Long userId, List<SwipeType> swipeTypes) {
+        return jpaRepository.findCardIdAndSwipeTypeByUserId(userId, swipeTypes);
     }
 }

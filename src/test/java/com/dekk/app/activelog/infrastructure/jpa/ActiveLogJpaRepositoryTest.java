@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.dekk.app.activelog.domain.model.ActiveLog;
 import com.dekk.app.activelog.domain.model.SwipeType;
-
+import com.dekk.app.activelog.domain.repository.CardSwipeProjection;
 import com.dekk.app.activelog.infrastructure.jpa.ActiveLogJpaRepository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,35 +25,39 @@ class ActiveLogJpaRepositoryTest {
     private ActiveLogJpaRepository activeLogJpaRepository;
 
     @Test
-    @DisplayName("특정 유저의 여러 SwipeType(LIKE, DISLIKE)에 해당하는 카드 ID 목록을 한 번에 조회한다")
-    void findCardIdsByUserIdAndSwipeTypes_Success() {
-
+    @DisplayName("LIKE/DISLIKE 조회 시 cardId와 swipeType 쌍이 함께 반환된다")
+    void findCardIdAndSwipeTypeByUserId_returnsAllTypes() {
         Long userId = 1L;
         activeLogJpaRepository.save(ActiveLog.create(userId, 101L, SwipeType.LIKE));
         activeLogJpaRepository.save(ActiveLog.create(userId, 102L, SwipeType.DISLIKE));
         activeLogJpaRepository.save(ActiveLog.create(userId, 103L, SwipeType.LIKE));
         activeLogJpaRepository.save(ActiveLog.create(2L, 104L, SwipeType.LIKE));
 
-        List<SwipeType> targetTypes = List.of(SwipeType.LIKE, SwipeType.DISLIKE);
+        List<CardSwipeProjection> rows = activeLogJpaRepository.findCardIdAndSwipeTypeByUserId(
+                userId, List.of(SwipeType.LIKE, SwipeType.DISLIKE));
 
-        List<Long> result = activeLogJpaRepository.findCardIdsByUserIdAndSwipeTypes(userId, targetTypes);
-
-        assertThat(result).hasSize(3);
-        assertThat(result).containsExactlyInAnyOrder(101L, 102L, 103L);
-        assertThat(result).doesNotContain(104L);
+        assertThat(rows).hasSize(3);
+        Map<SwipeType, List<Long>> grouped = rows.stream()
+                .collect(Collectors.groupingBy(
+                        CardSwipeProjection::getSwipeType,
+                        Collectors.mapping(CardSwipeProjection::getCardId, Collectors.toList())));
+        assertThat(grouped.get(SwipeType.LIKE)).containsExactlyInAnyOrder(101L, 103L);
+        assertThat(grouped.get(SwipeType.DISLIKE)).containsExactlyInAnyOrder(102L);
+        assertThat(rows.stream().map(CardSwipeProjection::getCardId).toList()).doesNotContain(104L);
     }
 
     @Test
-    @DisplayName("단일 타입 조회 시 IN 절을 통해 요청한 타입의 카드 ID만 정확히 반환한다")
-    void findCardIdsByUserIdAndSingleSwipeType_Success() {
-
+    @DisplayName("LIKE 단일 타입만 요청하면 LIKE 카드 ID만 반환된다")
+    void findCardIdAndSwipeTypeByUserId_filtersBySingleType() {
         Long userId = 1L;
         activeLogJpaRepository.save(ActiveLog.create(userId, 101L, SwipeType.LIKE));
         activeLogJpaRepository.save(ActiveLog.create(userId, 102L, SwipeType.DISLIKE));
 
-        List<Long> result = activeLogJpaRepository.findCardIdsByUserIdAndSwipeTypes(userId, List.of(SwipeType.LIKE));
+        List<CardSwipeProjection> rows = activeLogJpaRepository.findCardIdAndSwipeTypeByUserId(
+                userId, List.of(SwipeType.LIKE));
 
-        assertThat(result).hasSize(1);
-        assertThat(result).containsOnly(101L);
+        assertThat(rows).hasSize(1);
+        assertThat(rows.get(0).getCardId()).isEqualTo(101L);
+        assertThat(rows.getFirst().getSwipeType()).isEqualTo(SwipeType.LIKE);
     }
 }
