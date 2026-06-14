@@ -7,6 +7,9 @@ import java.util.UUID;
 
 @Schema(description = "비회원 카드 응답")
 public record GuestCardResponse(
+        @Schema(description = "카드 ID", example = "1")
+        Long cardId,
+
         @Schema(description = "카드 공개 ID", example = "550e8400-e29b-41d4-a716-446655440000")
         UUID publicId,
 
@@ -21,6 +24,6 @@ public record GuestCardResponse(
         List<String> tags) {
     public static GuestCardResponse from(GuestCardResult result) {
         return new GuestCardResponse(
-                result.publicId(), result.cardImageUrl(), result.height(), result.weight(), result.tags());
+                result.cardId(), result.publicId(), result.cardImageUrl(), result.height(), result.weight(), result.tags());
     }
 }

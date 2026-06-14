@@ -6,9 +6,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public record GuestCardResult(UUID publicId, String cardImageUrl, Integer height, Integer weight, List<String> tags) {
+public record GuestCardResult(Long cardId, UUID publicId, String cardImageUrl, Integer height, Integer weight, List<String> tags) {
     public static GuestCardResult from(Card card) {
         return new GuestCardResult(
+                card.getId(),
                 card.getPublicId(),
                 card.getCardImage().getImageUrl(),
                 card.getHeight(),

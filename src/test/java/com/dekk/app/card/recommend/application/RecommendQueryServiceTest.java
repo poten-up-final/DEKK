@@ -391,7 +391,7 @@ class RecommendQueryServiceTest {
         }
 
         private GuestCardResult guestCard(UUID publicId, String imageUrl) {
-            return new GuestCardResult(publicId, imageUrl, null, null, List.of());
+            return new GuestCardResult(null, publicId, imageUrl, null, null, List.of());
         }
     }
 
