@@ -8,6 +8,8 @@ import java.util.UUID;
 
 @Schema(description = "추천 피드 카드 응답")
 public record RecommendCardResponse(
+        @Schema(description = "카드 ID", example = "1") Long cardId,
+
         @Schema(description = "카드 공개 ID", example = "550e8400-e29b-41d4-a716-446655440000")
         UUID publicId,
 
@@ -46,6 +48,7 @@ public record RecommendCardResponse(
     public static RecommendCardResponse from(RecommendCardResult result) {
         MemberCardResult card = result.card();
         return new RecommendCardResponse(
+                card.cardId(),
                 card.publicId(),
                 card.cardImageUrl(),
                 card.height(),
