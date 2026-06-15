@@ -3,36 +3,23 @@ package com.dekk.app.card.recommend.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 import com.dekk.app.activelog.application.ActiveLogQueryService;
 import com.dekk.app.activelog.domain.model.SwipedCards;
-import com.dekk.app.card.application.CardCategoryQueryService;
 import com.dekk.app.card.application.CardQueryService;
 import com.dekk.app.card.application.dto.result.GuestCardResult;
 import com.dekk.app.card.application.dto.result.MemberCardResult;
-import com.dekk.app.card.domain.model.Card;
-import com.dekk.app.card.domain.model.CardImage;
-import com.dekk.app.card.recommend.application.RecommendQueryService;
-import com.dekk.app.card.recommend.application.RecommendScoringService;
 import com.dekk.app.card.recommend.application.dto.RecommendCardResult;
-import com.dekk.app.user.application.UserQueryService;
-import com.dekk.app.user.application.dto.result.UserInfoResult;
-import com.dekk.app.user.domain.model.enums.Gender;
-
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
@@ -45,80 +32,16 @@ class RecommendQueryServiceTest {
     private static final int SIZE = 10;
 
     @Mock private CardQueryService cardQueryService;
-    @Mock private UserQueryService userQueryService;
     @Mock private ActiveLogQueryService activeLogQueryService;
-    @Mock private CardCategoryQueryService cardCategoryQueryService;
-    @Mock private RecommendScoringService recommendScoringService;
+    @Mock private RecommendCandidateService candidateService;
 
-    @InjectMocks
     private RecommendQueryService recommendQueryService;
 
-    @Nested
-    @DisplayName("스와이프 이력 제외")
-    class ExcludeSwipedCards {
-
-        @BeforeEach
-        void setUp() {
-            given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(Gender.MALE, 175, 70));
-            given(activeLogQueryService.getSwipedCards(USER_ID)).willReturn(SwipedCards.empty());
-            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                .willAnswer(inv -> inv.getArgument(2));
-            given(cardQueryService.getLatestCards(any(), anyInt())).willReturn(List.of());
-        }
-
-        @Test
-        @DisplayName("스와이프한 카드는 추천 결과에서 제외된다")
-        void shouldExcludeSwipedCards_whenSwipedIdsExist() {
-            Card card10 = mockCard(10L);
-            Card card20 = mockCard(20L);
-            Card card30 = mockCard(30L);
-
-            given(cardQueryService.getRecommendCandidates(any()))
-                .willReturn(List.of(card10, card20, card30));
-            given(activeLogQueryService.getSwipedCards(USER_ID))
-                .willReturn(new SwipedCards(Set.of(10L, 20L), Set.of()));
-
-            List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
-
-            List<RecommendCardResult> recommended = recommendedOnly(result);
-            assertThat(recommended).hasSize(1);
-            assertThat(recommended.getFirst().card().cardId()).isEqualTo(30L);
-        }
-
-        @Test
-        @DisplayName("스와이프 이력이 없으면 후보 카드 전체가 추천 대상이 된다")
-        void shouldIncludeAllCandidates_whenNoSwipeHistory() {
-            Card card1 = mockCard(1L);
-            Card card2 = mockCard(2L);
-
-            given(cardQueryService.getRecommendCandidates(any()))
-                .willReturn(List.of(card1, card2));
-
-            List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
-
-            assertThat(recommendedOnly(result)).hasSize(2);
-        }
-
-        @Test
-        @DisplayName("모든 후보 카드를 스와이프했으면 추천 카드는 없다")
-        void shouldHaveNoRecommended_whenAllCandidatesSwiped() {
-            Card card1 = mockCard(1L);
-            Card card2 = mockCard(2L);
-
-            given(cardQueryService.getRecommendCandidates(any()))
-                .willReturn(List.of(card1, card2));
-            given(activeLogQueryService.getSwipedCards(USER_ID))
-                .willReturn(new SwipedCards(Set.of(1L, 2L), Set.of()));
-
-            List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
-
-            assertThat(recommendedOnly(result)).isEmpty();
-        }
+    @BeforeEach
+    void setUp() {
+        recommendQueryService = new RecommendQueryService(
+                cardQueryService, activeLogQueryService, candidateService,
+                new RecommendProperties(0.7, 10, 500));
     }
 
     @Nested
@@ -127,24 +50,19 @@ class RecommendQueryServiceTest {
 
         @BeforeEach
         void setUp() {
-            given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(Gender.MALE, 175, 70));
             given(activeLogQueryService.getSwipedCards(USER_ID)).willReturn(SwipedCards.empty());
-            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
         }
 
         @Test
         @DisplayName("size=10이면 추천 7개(70%), 일반 3개(30%)로 구성된다")
         void shouldReturn7Recommended3Normal_whenSize10() {
-            List<Card> candidates = mockCards(10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L);
-            given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                .willAnswer(inv -> inv.getArgument(2));
-            given(cardQueryService.getLatestCards(any(), anyInt()))
-                .willReturn(memberCards(100L, 101L, 102L));
+            given(candidateService.rankCandidates(any(), any()))
+                    .willReturn(memberCards(10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L));
+            given(candidateService.fetchNormalCards(anySet(), anySet(), anyInt()))
+                    .willReturn(memberCards(100L, 101L, 102L));
 
             List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(7);
             assertThat(normalOnly(result)).hasSize(3);
@@ -153,15 +71,13 @@ class RecommendQueryServiceTest {
         @Test
         @DisplayName("추천 후보가 부족하면 일반 카드로 나머지를 채운다")
         void shouldFillWithNormalCards_whenRecommendInsufficient() {
-            List<Card> candidates = mockCards(1L, 2L, 3L);
-            given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                .willAnswer(inv -> inv.getArgument(2));
-            given(cardQueryService.getLatestCards(any(), anyInt()))
-                .willReturn(memberCards(100L, 101L, 102L, 103L, 104L, 105L, 106L));
+            given(candidateService.rankCandidates(any(), any()))
+                    .willReturn(memberCards(1L, 2L, 3L));
+            given(candidateService.fetchNormalCards(anySet(), anySet(), anyInt()))
+                    .willReturn(memberCards(100L, 101L, 102L, 103L, 104L, 105L, 106L));
 
             List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             assertThat(recommendedOnly(result)).hasSize(3);
             assertThat(normalOnly(result)).hasSize(7);
@@ -170,15 +86,12 @@ class RecommendQueryServiceTest {
         @Test
         @DisplayName("recommended=true 카드와 recommended=false 카드가 올바르게 구분된다")
         void shouldTagRecommendedFlagCorrectly() {
-            List<Card> candidates = mockCards(1L);
-            given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                .willAnswer(inv -> inv.getArgument(2));
-            given(cardQueryService.getLatestCards(any(), anyInt()))
-                .willReturn(memberCards(100L));
+            given(candidateService.rankCandidates(any(), any())).willReturn(memberCards(1L));
+            given(candidateService.fetchNormalCards(anySet(), anySet(), anyInt()))
+                    .willReturn(memberCards(100L));
 
             List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
             assertThat(result).anyMatch(RecommendCardResult::recommended);
             assertThat(result).anyMatch(r -> !r.recommended());
@@ -187,107 +100,111 @@ class RecommendQueryServiceTest {
         @Test
         @DisplayName("일반 카드에는 추천 카드 ID가 포함되지 않는다")
         void shouldExcludeRecommendedIdsFromNormalCards() {
-            List<Card> candidates = mockCards(1L, 2L);
-            given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                .willAnswer(inv -> inv.getArgument(2));
-            given(cardQueryService.getLatestCards(any(), anyInt()))
-                .willReturn(memberCards(100L, 101L));
+            given(candidateService.rankCandidates(any(), any())).willReturn(memberCards(1L, 2L));
+            given(candidateService.fetchNormalCards(anySet(), anySet(), anyInt()))
+                    .willReturn(memberCards(100L, 101L));
 
             List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
+                    recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, 10)).getContent();
 
-            Set<Long> recommendedIds = recommendedOnly(result).stream()
-                .map(r -> r.card().cardId())
-                .collect(java.util.stream.Collectors.toSet());
-            Set<Long> normalIds = normalOnly(result).stream()
-                .map(r -> r.card().cardId())
-                .collect(java.util.stream.Collectors.toSet());
+            java.util.Set<Long> recommendedIds = recommendedOnly(result).stream()
+                    .map(r -> r.card().cardId())
+                    .collect(java.util.stream.Collectors.toSet());
+            java.util.Set<Long> normalIds = normalOnly(result).stream()
+                    .map(r -> r.card().cardId())
+                    .collect(java.util.stream.Collectors.toSet());
 
             assertThat(recommendedIds).doesNotContainAnyElementsOf(normalIds);
         }
     }
 
     @Nested
-    @DisplayName("유저 프로파일 기반 필터링")
-    class ProfileBasedFiltering {
+    @DisplayName("회원 SEO startCardId 처리")
+    class MemberStartCard {
+
+        private final UUID START_UUID = UUID.randomUUID();
+        private final PageRequest PAGE = PageRequest.of(0, 10);
 
         @BeforeEach
         void setUp() {
-            given(cardQueryService.getRecommendCandidates(any())).willReturn(List.of());
             given(activeLogQueryService.getSwipedCards(USER_ID)).willReturn(SwipedCards.empty());
-            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                .willAnswer(inv -> inv.getArgument(2));
-            given(cardQueryService.getLatestCards(any(), anyInt())).willReturn(List.of());
+            given(candidateService.rankCandidates(any(), any())).willReturn(List.of(
+                    memberCard(1L, UUID.randomUUID()),
+                    memberCard(2L, UUID.randomUUID()),
+                    memberCard(3L, UUID.randomUUID())));
+            given(candidateService.fetchNormalCards(anySet(), anySet(), anyInt())).willReturn(List.of(
+                    memberCard(100L, UUID.randomUUID()),
+                    memberCard(101L, UUID.randomUUID())));
         }
 
         @Test
-        @DisplayName("성별 정보가 없으면 전체 성별 대상으로 카드가 조회된다")
-        void shouldQueryAllGenders_whenGenderIsNull() {
-            given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(null, 170, 65));
+        @DisplayName("startCardId가 존재하면 해당 카드가 첫 번째로 온다")
+        void shouldPrependStartCard_whenStartCardExists() {
+            MemberCardResult startCard = memberCard(99L, START_UUID);
+            given(cardQueryService.findByPublicId(START_UUID)).willReturn(Optional.of(startCard));
 
             List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                    recommendQueryService.getRecommendCards(USER_ID, PAGE, START_UUID).getContent();
 
-            assertThat(result).isEmpty();
+            assertThat(result.getFirst().card().publicId()).isEqualTo(START_UUID);
         }
 
         @Test
-        @DisplayName("체형 정보가 없으면 기본 범위(전체)로 카드가 조회된다")
-        void shouldUseDefaultRange_whenBodyInfoIsNull() {
-            given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(Gender.MALE, null, null));
-            List<Card> candidates = mockCards(1L);
-            given(cardQueryService.getRecommendCandidates(any())).willReturn(candidates);
+        @DisplayName("startCardId가 이미 추천 목록에 있으면 중복 없이 첫 번째로 온다")
+        void shouldNotDuplicate_whenStartCardAlreadyInResults() {
+            MemberCardResult startCard = memberCard(1L, START_UUID);
+            given(candidateService.rankCandidates(any(), any()))
+                    .willReturn(List.of(startCard, memberCard(2L, UUID.randomUUID())));
+            given(candidateService.fetchNormalCards(anySet(), anySet(), anyInt()))
+                    .willReturn(List.of(memberCard(100L, UUID.randomUUID())));
+            given(cardQueryService.findByPublicId(START_UUID)).willReturn(Optional.of(startCard));
 
             List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                    recommendQueryService.getRecommendCards(USER_ID, PAGE, START_UUID).getContent();
 
-            assertThat(recommendedOnly(result)).hasSize(1);
-        }
-    }
-
-    @Nested
-    @DisplayName("LIKE 카드 기반 카테고리 선호도 반영")
-    class CategoryPreference {
-
-        @BeforeEach
-        void setUp() {
-            given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(Gender.MALE, 175, 70));
-            given(cardQueryService.getRecommendCandidates(any())).willReturn(List.of());
-            given(cardQueryService.getLatestCards(any(), anyInt())).willReturn(List.of());
+            long count = result.stream()
+                    .filter(r -> START_UUID.equals(r.card().publicId()))
+                    .count();
+            assertThat(count).isEqualTo(1);
+            assertThat(result.getFirst().card().publicId()).isEqualTo(START_UUID);
         }
 
         @Test
-        @DisplayName("LIKE 이력이 없으면 빈 선호 맵으로 랭킹을 수행한다")
-        void shouldRankWithEmptyPreferences_whenNoLikeHistory() {
-            given(activeLogQueryService.getSwipedCards(USER_ID)).willReturn(SwipedCards.empty());
-            given(cardCategoryQueryService.getCardCategoryMap(List.of())).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(List.of())).willReturn(Map.of());
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                .willAnswer(inv -> inv.getArgument(2));
+        @DisplayName("startCardId에 해당하는 카드가 없으면 결과 목록 그대로 반환한다")
+        void shouldReturnOriginalList_whenStartCardNotFound() {
+            given(cardQueryService.findByPublicId(START_UUID)).willReturn(Optional.empty());
 
             List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                    recommendQueryService.getRecommendCards(USER_ID, PAGE, START_UUID).getContent();
 
-            assertThat(result).isEmpty();
+            assertThat(result.getFirst().card().publicId()).isNotEqualTo(START_UUID);
         }
 
         @Test
-        @DisplayName("LIKE한 카드에 카테고리 매핑이 없으면 빈 선호 맵으로 랭킹을 수행한다")
-        void shouldRankWithEmptyPreferences_whenLikedCardsHaveNoCategories() {
-            given(activeLogQueryService.getSwipedCards(USER_ID))
-                .willReturn(new SwipedCards(Set.of(10L, 20L), Set.of()));
-            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                .willAnswer(inv -> inv.getArgument(2));
+        @DisplayName("page > 0이면 startCardId가 있어도 prepend하지 않는다")
+        void shouldNotPrepend_whenPageIsNotFirst() {
+            PageRequest page1 = PageRequest.of(1, 10);
+            given(candidateService.rankCandidates(any(), any())).willReturn(List.of(
+                    memberCard(1L, UUID.randomUUID()), memberCard(2L, UUID.randomUUID()),
+                    memberCard(3L, UUID.randomUUID()), memberCard(4L, UUID.randomUUID()),
+                    memberCard(5L, UUID.randomUUID()), memberCard(6L, UUID.randomUUID()),
+                    memberCard(7L, UUID.randomUUID()), memberCard(8L, UUID.randomUUID()),
+                    memberCard(9L, UUID.randomUUID()), memberCard(10L, UUID.randomUUID()),
+                    memberCard(11L, UUID.randomUUID()), memberCard(12L, UUID.randomUUID()),
+                    memberCard(13L, UUID.randomUUID()), memberCard(14L, UUID.randomUUID()),
+                    memberCard(15L, UUID.randomUUID()), memberCard(16L, UUID.randomUUID()),
+                    memberCard(17L, UUID.randomUUID()), memberCard(18L, UUID.randomUUID()),
+                    memberCard(19L, UUID.randomUUID()), memberCard(20L, UUID.randomUUID())));
+            given(candidateService.fetchNormalCards(anySet(), anySet(), anyInt())).willReturn(List.of(
+                    memberCard(100L, UUID.randomUUID()), memberCard(101L, UUID.randomUUID()),
+                    memberCard(102L, UUID.randomUUID()), memberCard(103L, UUID.randomUUID()),
+                    memberCard(104L, UUID.randomUUID()), memberCard(105L, UUID.randomUUID()),
+                    memberCard(106L, UUID.randomUUID()), memberCard(107L, UUID.randomUUID())));
 
             List<RecommendCardResult> result =
-                recommendQueryService.getRecommendCards(USER_ID, PageRequest.of(0, SIZE)).getContent();
+                    recommendQueryService.getRecommendCards(USER_ID, page1, START_UUID).getContent();
 
-            assertThat(result).isEmpty();
+            assertThat(result).noneMatch(r -> START_UUID.equals(r.card().publicId()));
         }
     }
 
@@ -376,8 +293,7 @@ class RecommendQueryServiceTest {
                     guestCard(UUID.randomUUID(), "http://7.jpg"),
                     guestCard(UUID.randomUUID(), "http://8.jpg"),
                     guestCard(UUID.randomUUID(), "http://9.jpg"),
-                    guestCard(UUID.randomUUID(), "http://10.jpg")
-            );
+                    guestCard(UUID.randomUUID(), "http://10.jpg"));
 
             given(cardQueryService.getCardsForGuestRandom(PAGE))
                     .willReturn(new SliceImpl<>(tenOthers, PAGE, false));
@@ -403,31 +319,13 @@ class RecommendQueryServiceTest {
         return result.stream().filter(r -> !r.recommended()).toList();
     }
 
-    private UserInfoResult userInfo(Gender gender, Integer height, Integer weight) {
-        return new UserInfoResult(USER_ID, "test@test.com", "닉네임", height, weight, gender, "ACTIVE", "USER");
-    }
-
-    private Card mockCard(Long cardId) {
-        Card card = mock(Card.class);
-        CardImage cardImage = mock(CardImage.class);
-        given(card.getId()).willReturn(cardId);
-        given(card.getPublicId()).willReturn(UUID.randomUUID());
-        given(card.getCardImage()).willReturn(cardImage);
-        given(cardImage.getImageUrl()).willReturn("http://image.url/" + cardId);
-        given(card.getHeight()).willReturn(170);
-        given(card.getWeight()).willReturn(65);
-        given(card.getTags()).willReturn(null);
-        given(card.getCardProducts()).willReturn(List.of());
-        return card;
-    }
-
-    private List<Card> mockCards(Long... ids) {
-        return java.util.Arrays.stream(ids).map(this::mockCard).toList();
-    }
-
     private List<MemberCardResult> memberCards(Long... ids) {
         return java.util.Arrays.stream(ids)
-            .map(id -> new MemberCardResult(id, null, null, null, null, List.of(), List.of()))
-            .toList();
+                .map(id -> new MemberCardResult(id, null, null, null, null, List.of(), List.of()))
+                .toList();
+    }
+
+    private MemberCardResult memberCard(Long id, UUID publicId) {
+        return new MemberCardResult(id, publicId, null, null, null, List.of(), List.of());
     }
 }
