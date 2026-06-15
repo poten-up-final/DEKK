@@ -58,10 +58,6 @@ class RecommendCandidateServiceTest {
         @BeforeEach
         void setUp() {
             given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(Gender.MALE, 175, 70));
-            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
         }
 
         @Test
@@ -69,6 +65,10 @@ class RecommendCandidateServiceTest {
         void shouldExcludeSwipedCards_whenSwipedIdsExist() {
             Card c10 = mockCard(10L), c20 = mockCard(20L), c30 = mockCard(30L);
             given(cardQueryService.getRecommendCandidates(any())).willReturn(List.of(c10, c20, c30));
+            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
+            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
+            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
+                    .willAnswer(inv -> inv.getArgument(2));
 
             List<MemberCardResult> result = candidateService.rankCandidates(
                     USER_ID, new SwipedCards(Set.of(10L, 20L), Set.of()));
@@ -82,6 +82,10 @@ class RecommendCandidateServiceTest {
         void shouldIncludeAllCandidates_whenNoSwipeHistory() {
             Card c1 = mockCard(1L), c2 = mockCard(2L);
             given(cardQueryService.getRecommendCandidates(any())).willReturn(List.of(c1, c2));
+            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
+            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
+            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
+                    .willAnswer(inv -> inv.getArgument(2));
 
             List<MemberCardResult> result = candidateService.rankCandidates(USER_ID, SwipedCards.empty());
 
@@ -108,10 +112,6 @@ class RecommendCandidateServiceTest {
         @BeforeEach
         void setUp() {
             given(cardQueryService.getRecommendCandidates(any())).willReturn(List.of());
-            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
         }
 
         @Test
@@ -150,6 +150,10 @@ class RecommendCandidateServiceTest {
                     ArgumentCaptor.forClass(RecommendCandidateQuery.class);
             Card c1 = mockCard(1L);
             given(cardQueryService.getRecommendCandidates(any())).willReturn(List.of(c1));
+            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
+            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
+            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
+                    .willAnswer(inv -> inv.getArgument(2));
 
             candidateService.rankCandidates(USER_ID, SwipedCards.empty());
 
@@ -170,27 +174,19 @@ class RecommendCandidateServiceTest {
         void setUp() {
             given(userQueryService.getMyInfo(USER_ID)).willReturn(userInfo(Gender.MALE, 175, 70));
             given(cardQueryService.getRecommendCandidates(any())).willReturn(List.of());
-            given(recommendScoringService.rank(any(), any(), any(), any(), any()))
-                    .willAnswer(inv -> inv.getArgument(2));
         }
 
         @Test
-        @DisplayName("LIKE 이력이 없으면 빈 선호 맵으로 랭킹을 수행한다")
+        @DisplayName("LIKE 이력이 없으면 후보가 없을 때 빈 결과를 반환한다")
         void shouldRankWithEmptyPreferences_whenNoLikeHistory() {
-            given(cardCategoryQueryService.getCardCategoryMap(List.of())).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(List.of())).willReturn(Map.of());
-
             List<MemberCardResult> result = candidateService.rankCandidates(USER_ID, SwipedCards.empty());
 
             assertThat(result).isEmpty();
         }
 
         @Test
-        @DisplayName("LIKE한 카드에 카테고리 매핑이 없으면 빈 선호 맵으로 랭킹을 수행한다")
+        @DisplayName("LIKE한 카드에 카테고리 매핑이 없으면 후보가 없을 때 빈 결과를 반환한다")
         void shouldRankWithEmptyPreferences_whenLikedCardsHaveNoCategories() {
-            given(cardCategoryQueryService.getCardCategoryMap(any())).willReturn(Map.of());
-            given(recommendScoringService.calculateCategoryPreferenceRatios(any())).willReturn(Map.of());
-
             List<MemberCardResult> result = candidateService.rankCandidates(
                     USER_ID, new SwipedCards(Set.of(10L, 20L), Set.of()));
 

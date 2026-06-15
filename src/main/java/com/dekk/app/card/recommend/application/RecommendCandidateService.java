@@ -34,6 +34,11 @@ public class RecommendCandidateService {
                 .filter(card -> !swiped.isAlreadySwiped(card.cardId()))
                 .toList();
 
+        if (candidates.isEmpty()) {
+            log.info("[Recommend] 후보 없음 userId={} (전부 스와이프 완료)", userId);
+            return List.of();
+        }
+
         if (candidates.size() >= properties.largeCandidateThreshold()) {
             log.warn("[Recommend] 대용량 후보군 스코어링 userId={} candidateCount={} - 인메모리 부하 위험", userId, candidates.size());
         }
@@ -56,7 +61,8 @@ public class RecommendCandidateService {
                 userInfo.height(), userInfo.weight(), candidates, cardCategoryMap, preferences);
     }
 
-    // recommendIds.size()만큼 오버 패치하여 필터 후에도 normalCount를 채울 수 있도록 보장
+    // recommendIds.size()만큼 오버 패치하여 필터 후에도 normalCount를 채울 수 있도록 보장.
+    // DB NOT IN 대신 in-memory 필터를 사용하여 오버패치 보장(DB 집합 연산 비용 없이 정확한 제외).
     public List<MemberCardResult> fetchNormalCards(Set<Long> swipedIds, Set<Long> recommendIds, int normalCount) {
         List<MemberCardResult> candidates =
                 cardQueryService.getLatestCards(swipedIds, normalCount + recommendIds.size());
