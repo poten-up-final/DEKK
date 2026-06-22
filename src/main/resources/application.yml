@@ -19,6 +19,11 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
+recommend:
+  ratio: 0.7
+  deep-scroll-page-threshold: 10
+  large-candidate-threshold: 500
+
 jwt:
   access-token-validity-in-seconds: 3600
   refresh-token-validity-in-seconds: 1209600
