@@ -42,7 +42,6 @@ logs/
 
 # macOS metadata
 .DS_Store
-docs
 
 # === [DEKK Security & Environments] ===
 # 환경변수 파일
