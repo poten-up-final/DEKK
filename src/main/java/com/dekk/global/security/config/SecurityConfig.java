@@ -62,7 +62,8 @@ public class SecurityConfig {
                                 "/w/v1/decks/shared/*/cards",
                                 "/adm/v1/auth/login",
                                 "/adm/v1/auth/logout",
-                                "/w/v1/auth/logout")
+                                "/w/v1/auth/logout",
+                                "/adm/v1/admins/signup")
                         .permitAll()
                         .requestMatchers("/adm/v1/admins/**")
                         .hasRole("SUPER_ADMIN")

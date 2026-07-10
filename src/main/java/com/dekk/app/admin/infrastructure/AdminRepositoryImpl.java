@@ -1,6 +1,8 @@
 package com.dekk.app.admin.infrastructure;
 
 import com.dekk.app.admin.domain.model.Admin;
+import com.dekk.app.admin.domain.model.AdminRole;
+import com.dekk.app.admin.domain.model.AdminStatus;
 import com.dekk.app.admin.domain.repository.AdminRepository;
 import com.dekk.app.admin.infrastructure.jpa.AdminJpaRepository;
 import java.util.Optional;
@@ -19,6 +21,11 @@ public class AdminRepositoryImpl implements AdminRepository {
     }
 
     @Override
+    public Admin saveAndFlush(Admin admin) {
+        return adminJpaRepository.saveAndFlush(admin);
+    }
+
+    @Override
     public Optional<Admin> findByEmail(String email) {
         return adminJpaRepository.findByEmail(email);
     }
@@ -31,5 +38,10 @@ public class AdminRepositoryImpl implements AdminRepository {
     @Override
     public Optional<Admin> findById(Long id) {
         return adminJpaRepository.findById(id);
+    }
+
+    @Override
+    public long countByAdminRoleAndStatus(AdminRole adminRole, AdminStatus status) {
+        return adminJpaRepository.countByAdminRoleAndStatus(adminRole, status);
     }
 }

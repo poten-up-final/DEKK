@@ -40,6 +40,12 @@ public class JwtTokenProvider {
     private final long accessTokenValidityTime;
     private final long refreshTokenValidityTime;
 
+    @Value("${jwt.admin-access-token-validity-in-seconds}")
+    private long adminAtValidityInSeconds;
+
+    @Value("${jwt.admin-refresh-token-validity-in-seconds}")
+    private long adminRtValidityInSeconds;
+
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.access-token-validity-in-seconds}") long accessTokenValidityInSeconds,
@@ -51,11 +57,17 @@ public class JwtTokenProvider {
     }
 
     public String createAccessToken(Authentication authentication) {
-        return createToken(authentication, accessTokenValidityTime, ACCESS_TOKEN_TYPE);
+        long validTime = (authentication.getPrincipal() instanceof AdminUserDetails)
+                ? adminAtValidityInSeconds * 1000
+                : accessTokenValidityTime;
+        return createToken(authentication, validTime, ACCESS_TOKEN_TYPE);
     }
 
     public String createRefreshToken(Authentication authentication) {
-        return createToken(authentication, refreshTokenValidityTime, REFRESH_TOKEN_TYPE);
+        long validTime = (authentication.getPrincipal() instanceof AdminUserDetails)
+                ? adminRtValidityInSeconds * 1000
+                : refreshTokenValidityTime;
+        return createToken(authentication, validTime, REFRESH_TOKEN_TYPE);
     }
 
     private String createToken(Authentication authentication, long tokenValidTime, String tokenType) {
