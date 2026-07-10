@@ -42,12 +42,14 @@ public class AdminTokenBlackListRedisRepositoryImpl implements AdminTokenBlackLi
     }
 
     @Override
-    public void saveKickOut(Long adminId, long ttlSeconds) {
-        if (adminId == null || ttlSeconds <= 0) return;
+    public boolean saveKickOut(Long adminId, long ttlSeconds) {
+        if (adminId == null || ttlSeconds <= 0) return false;
         try {
             redisTemplate.opsForValue().set(KICKOUT_PREFIX + adminId, "kicked_out", ttlSeconds, TimeUnit.SECONDS);
+            return true;
         } catch (Exception e) {
             log.error("[Redis Fail-Safe] 강제 킥아웃 수배령 저장 실패 - AdminId: {}", adminId, e);
+            return false;
         }
     }
 

@@ -5,7 +5,7 @@ public interface AdminTokenBlackListRepository {
 
     boolean isBlacklisted(String accessToken);
 
-    void saveKickOut(Long adminId, long ttlSeconds);
+    boolean saveKickOut(Long adminId, long ttlSeconds);
 
     boolean isKickedOut(Long adminId);
 }

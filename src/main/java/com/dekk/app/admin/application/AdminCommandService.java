@@ -6,6 +6,7 @@ import com.dekk.app.admin.domain.exception.AdminBusinessException;
 import com.dekk.app.admin.domain.exception.AdminErrorCode;
 import com.dekk.app.admin.domain.model.Admin;
 import com.dekk.app.admin.domain.model.AdminRole;
+import com.dekk.app.admin.domain.model.AdminStatus;
 import com.dekk.app.admin.domain.repository.AdminRefreshTokenRepository;
 import com.dekk.app.admin.domain.repository.AdminRepository;
 import com.dekk.app.admin.domain.repository.AdminTokenBlackListRepository;
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -51,35 +53,70 @@ public class AdminCommandService {
         adminEmailService.sendInviteEmail(command.email(), token);
 
         log.info("[Audit] 관리자 초대 토큰 발행. InviterId: {}, Email: {}, IP: {}", inviterId, command.email(), clientIp);
-        log.info("[테스트용 임시 토큰 발급] Token: {}", token);
     }
 
     public void completeSignup(AdminSignupCommand command, String clientIp) {
-        String data = redisTemplate.opsForValue().get(INVITE_PREFIX + command.token());
+        String data = redisTemplate.opsForValue().getAndDelete(INVITE_PREFIX + command.token());
         if (data == null) {
             throw new AdminBusinessException(AdminErrorCode.INVALID_INVITE_TOKEN);
         }
 
         String[] parts = data.split(":");
+        if (parts.length != 3) {
+            throw new AdminBusinessException(AdminErrorCode.INVALID_INVITE_TOKEN);
+        }
+
         String email = parts[0];
-        AdminRole role = AdminRole.valueOf(parts[1]);
+        AdminRole role;
+        try {
+            role = AdminRole.valueOf(parts[1]);
+        } catch (IllegalArgumentException e) {
+            throw new AdminBusinessException(AdminErrorCode.INVALID_INVITE_TOKEN);
+        }
+
+        if (adminRepository.existsByEmail(email)) {
+            throw new AdminBusinessException(AdminErrorCode.DUPLICATE_EMAIL);
+        }
 
         Admin admin = Admin.create(email, passwordEncoder.encode(command.password()), role, command.department());
-        adminRepository.save(admin);
+        try {
+            adminRepository.saveAndFlush(admin);
+        } catch (DataIntegrityViolationException e) {
+            throw new AdminBusinessException(AdminErrorCode.DUPLICATE_EMAIL);
+        }
 
-        redisTemplate.delete(INVITE_PREFIX + command.token());
         log.info("[Audit] 신규 관리자 가입 완료. AdminId: {}, IP: {}", admin.getId(), clientIp);
     }
 
     public void suspendAdmin(Long suspenderId, Long targetId, String clientIp) {
+        if (targetId != null && targetId.equals(suspenderId)) {
+            throw new AdminBusinessException(AdminErrorCode.CANNOT_SUSPEND_SELF);
+        }
+
         Admin admin = adminRepository
                 .findById(targetId)
                 .orElseThrow(() -> new AdminBusinessException(AdminErrorCode.ADMIN_NOT_FOUND));
 
+        if (isLastActiveSuperAdmin(admin)) {
+            throw new AdminBusinessException(AdminErrorCode.LAST_SUPER_ADMIN_CANNOT_BE_SUSPENDED);
+        }
+
         admin.suspend();
         adminRefreshTokenRepository.deleteByAdminId(targetId);
-        adminTokenBlackListRepository.saveKickOut(targetId, adminAtValidityTime);
+        if (!adminTokenBlackListRepository.saveKickOut(targetId, adminAtValidityTime)) {
+            throw new AdminBusinessException(AdminErrorCode.KICKOUT_REGISTRATION_FAILED);
+        }
 
-        log.warn("[Audit] 관리자 강제 정지(Kill-Switch). TargetId: {}, IP: {}", targetId, clientIp);
+        log.warn(
+                "[Audit] 관리자 강제 정지(Kill-Switch). SuspenderId: {}, TargetId: {}, IP: {}",
+                suspenderId,
+                targetId,
+                clientIp);
+    }
+
+    private boolean isLastActiveSuperAdmin(Admin admin) {
+        return admin.getAdminRole() == AdminRole.SUPER_ADMIN
+                && admin.getStatus() == AdminStatus.ACTIVE
+                && adminRepository.countByAdminRoleAndStatus(AdminRole.SUPER_ADMIN, AdminStatus.ACTIVE) <= 1;
     }
 }
